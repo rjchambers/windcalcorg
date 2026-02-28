@@ -1,21 +1,28 @@
 import { useState } from 'react';
 import { pdf } from '@react-pdf/renderer';
-import { FileDown, Loader2 } from 'lucide-react';
+import { FileDown, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useFastenerStore } from '@/stores/fastener-store';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import FastenerCalcPdfReport from './FastenerCalcPdfReport';
 
 const FastenerPdfExportButton = () => {
   const { inputs, outputs, tas105Outputs } = useFastenerStore();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [projectName, setProjectName] = useState('');
   const [preparedBy, setPreparedBy] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const handleExport = async () => {
+  const handlePreview = async () => {
     if (!outputs) return;
     setGenerating(true);
     try {
@@ -26,19 +33,43 @@ const FastenerPdfExportButton = () => {
           tas105Outputs={tas105Outputs}
           projectName={projectName || 'Untitled Project'}
           preparedBy={preparedBy}
+          watermark={true}
         />
       ).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `FastenerCalc_${(projectName || 'Report').replace(/\s+/g, '_')}.pdf`;
+      a.download = `FastenerCalc_SAMPLE_${(projectName || 'Report').replace(/\s+/g, '_')}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      setOpen(false);
     } catch (err) {
       console.error('PDF generation failed:', err);
+      toast.error('Failed to generate preview PDF');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handlePurchase = async () => {
+    if (!user) {
+      toast.error('Please log in to purchase a report');
+      navigate('/login');
+      return;
+    }
+    setPurchasing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-report-payment', {
+        body: { reportType: 'fastener' },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err: any) {
+      console.error('Payment failed:', err);
+      toast.error('Failed to start checkout');
+    } finally {
+      setPurchasing(false);
     }
   };
 
@@ -73,10 +104,31 @@ const FastenerPdfExportButton = () => {
               className="font-mono text-sm"
             />
           </div>
-          <p className="text-[10px] text-muted-foreground">
-            Report includes cover page, full derivation chain per zone, fastener patterns, insulation, TAS 105, and signature block.
-          </p>
-          <Button onClick={handleExport} disabled={generating} className="w-full">
+
+          <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-foreground">Clean PDF Report</span>
+              <span className="text-sm font-bold text-primary">$10.00</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Full derivation chain, zone pressures, fastener patterns, insulation, TAS 105, and signature block — no watermarks.
+            </p>
+            <Button onClick={handlePurchase} disabled={purchasing} className="w-full">
+              {purchasing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Opening Checkout…
+                </>
+              ) : (
+                <>
+                  <Lock className="mr-2 h-4 w-4" />
+                  Purchase Report — $10.00
+                </>
+              )}
+            </Button>
+          </div>
+
+          <Button variant="outline" onClick={handlePreview} disabled={generating} className="w-full">
             {generating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -85,7 +137,7 @@ const FastenerPdfExportButton = () => {
             ) : (
               <>
                 <FileDown className="mr-2 h-4 w-4" />
-                Download PDF
+                Download Sample (Watermarked)
               </>
             )}
           </Button>

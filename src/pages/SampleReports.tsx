@@ -95,6 +95,7 @@ const SampleReports = () => {
           outputs={outputs}
           projectName="Sample — 456 Ocean Dr, Miami Beach"
           preparedBy="John Smith, P.E."
+          watermark={true}
         />
       ).toBlob();
       setWindBlobUrl(URL.createObjectURL(blob));
@@ -118,6 +119,7 @@ const SampleReports = () => {
           preparedBy="Jane Doe, P.E."
           jobAddress="789 Brickell Ave, Miami, FL 33131"
           peNumber="FL PE #67890"
+          watermark={true}
         />
       ).toBlob();
       setFastenerBlobUrl(URL.createObjectURL(blob));

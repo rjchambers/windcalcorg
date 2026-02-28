@@ -4,9 +4,6 @@ import {
   Text,
   View,
   StyleSheet,
-  Svg,
-  Rect,
-  Line,
 } from '@react-pdf/renderer';
 import type { FastenerInputs, FastenerOutputs, TAS105Outputs, NOAZoneResult } from '@/lib/fastener-engine';
 import type { EngineerProfile } from '@/lib/engineer-profile';
@@ -328,12 +325,13 @@ const FastenerCalcPdfReport = ({
           Per ASCE 7-22 Fig. 30.3-2A · Low-slope (θ ≤ 7°)
         </Text>
 
-        <ZoneDiagramSvg
+        <ZoneDiagramPdf
           length={inputs.buildingLength}
           width={inputs.buildingWidth}
           zoneWidth={outputs.zonePressures.zoneWidth_ft}
           pressures={outputs.zonePressures}
           mdp={mdpAbs}
+          fastenerResults={outputs.fastenerResults}
         />
 
         <PageFooter rasRef={rasRef} firmName={firmName} />
@@ -598,44 +596,146 @@ const FastenerCalcPdfReport = ({
   );
 };
 
-// ──── Zone Diagram SVG for PDF ────
+// ──── Zone Diagram for PDF (View-based layout) ────
 
-const ZoneDiagramSvg = ({ length, width, zoneWidth, pressures, mdp }: {
+const zd = StyleSheet.create({
+  label: { position: 'absolute', fontSize: 7, fontFamily: 'Helvetica-Bold' },
+  labelMono: { position: 'absolute', fontSize: 6.5, fontFamily: 'Courier' },
+  dimText: { position: 'absolute', fontSize: 7, fontFamily: 'Courier', color: '#334155', textAlign: 'center' },
+  legendTitle: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#e2e8f0', marginBottom: 4 },
+  legendRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 3 },
+  legendSwatch: { width: 8, height: 8, borderRadius: 1, marginRight: 4 },
+  legendText: { fontSize: 6.5, fontFamily: 'Courier' },
+});
+
+const ZoneDiagramPdf = ({ length, width, zoneWidth, pressures, mdp, fastenerResults }: {
   length: number; width: number; zoneWidth: number; pressures: any; mdp: number;
+  fastenerResults?: any[];
 }) => {
-  const svgW = 460;
-  const svgH = 340;
-  const pad = 50;
-  const bW = svgW - pad * 2;
-  const bH = svgH - pad * 2;
+  const containerH = 320;
+  const ox = 50;
+  const oy = 36;
+  const bW = 430;
+  const bH = containerH - oy - 30;
+
   const scX = bW / length;
   const scY = bH / width;
-  const zwX = Math.min(zoneWidth * scX, bW / 2);
-  const zwY = Math.min(zoneWidth * scY, bH / 2);
+
+  const zwX = Math.min(zoneWidth, length / 2) * scX;
+  const zwY = Math.min(zoneWidth, width / 2) * scY;
+  const zw2X = Math.min(2 * zoneWidth, length / 2) * scX;
+  const zw2Y = Math.min(2 * zoneWidth, width / 2) * scY;
+  const zone1primeExists = (length > 4 * zoneWidth) && (width > 4 * zoneWidth);
+
+  const zc = {
+    '3': { bg: '#dc262624', border: '#dc2626', text: '#dc2626' },
+    '2': { bg: '#d9770620', border: '#d97706', text: '#d97706' },
+    '1': { bg: '#eab30818', border: '#a16207', text: '#a16207' },
+    '1p': { bg: '#2563eb10', border: '#2563eb', text: '#2563eb' },
+  };
+
+  const zr = (l: number, t: number, w: number, h: number, clr: typeof zc['3'], dashed?: boolean) => (
+    w > 0 && h > 0 ? (
+      <View style={{
+        position: 'absolute', left: l, top: t, width: w, height: h,
+        backgroundColor: clr.bg, borderWidth: 0.5, borderColor: clr.border,
+        ...(dashed ? { borderStyle: 'dashed' as const } : {}),
+      }} />
+    ) : null
+  );
 
   return (
-    <Svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`}>
+    <View style={{ width: '100%', height: containerH, position: 'relative', marginBottom: 8 }}>
       {/* Building outline */}
-      <Rect x={pad} y={pad} width={bW} height={bH} fill="none" stroke="#2563eb" strokeWidth={1.5} />
+      <View style={{ position: 'absolute', left: ox, top: oy, width: bW, height: bH, borderWidth: 1.5, borderColor: '#2563eb' }} />
 
-      {/* Zone 1' field */}
-      <Rect x={pad + zwX} y={pad + zwY} width={bW - 2 * zwX} height={bH - 2 * zwY} fill="#2563eb" fillOpacity={0.06} stroke="#2563eb" strokeWidth={0.5} strokeDasharray="4,2" />
+      {/* Zone 1' */}
+      {zone1primeExists && zr(ox + zw2X, oy + zw2Y, bW - 2 * zw2X, bH - 2 * zw2Y, zc['1p'], true)}
+
+      {/* Zone 1 strips */}
+      {zr(ox + zwX, oy + zwY, bW - 2 * zwX, zw2Y - zwY, zc['1'])}
+      {zr(ox + zwX, oy + bH - zw2Y, bW - 2 * zwX, zw2Y - zwY, zc['1'])}
+      {zr(ox + zwX, oy + zw2Y, zw2X - zwX, bH - 2 * zw2Y, zc['1'])}
+      {zr(ox + bW - zw2X, oy + zw2Y, zw2X - zwX, bH - 2 * zw2Y, zc['1'])}
 
       {/* Zone 2 strips */}
-      <Rect x={pad + zwX} y={pad} width={bW - 2 * zwX} height={zwY} fill="#d97706" fillOpacity={0.12} />
-      <Rect x={pad + zwX} y={pad + bH - zwY} width={bW - 2 * zwX} height={zwY} fill="#d97706" fillOpacity={0.12} />
-      <Rect x={pad} y={pad + zwY} width={zwX} height={bH - 2 * zwY} fill="#d97706" fillOpacity={0.08} />
-      <Rect x={pad + bW - zwX} y={pad + zwY} width={zwX} height={bH - 2 * zwY} fill="#d97706" fillOpacity={0.08} />
+      {zr(ox + zwX, oy, bW - 2 * zwX, zwY, zc['2'])}
+      {zr(ox + zwX, oy + bH - zwY, bW - 2 * zwX, zwY, zc['2'])}
+      {zr(ox, oy + zwY, zwX, bH - 2 * zwY, zc['2'])}
+      {zr(ox + bW - zwX, oy + zwY, zwX, bH - 2 * zwY, zc['2'])}
 
       {/* Zone 3 corners */}
-      <Rect x={pad} y={pad} width={zwX} height={zwY} fill="#dc2626" fillOpacity={0.12} />
-      <Rect x={pad + bW - zwX} y={pad} width={zwX} height={zwY} fill="#dc2626" fillOpacity={0.12} />
-      <Rect x={pad} y={pad + bH - zwY} width={zwX} height={zwY} fill="#dc2626" fillOpacity={0.12} />
-      <Rect x={pad + bW - zwX} y={pad + bH - zwY} width={zwX} height={zwY} fill="#dc2626" fillOpacity={0.12} />
+      {zr(ox, oy, zwX, zwY, zc['3'])}
+      {zr(ox + bW - zwX, oy, zwX, zwY, zc['3'])}
+      {zr(ox, oy + bH - zwY, zwX, zwY, zc['3'])}
+      {zr(ox + bW - zwX, oy + bH - zwY, zwX, zwY, zc['3'])}
 
-      {/* Dimension labels */}
-      <Line x1={pad} y1={svgH - 10} x2={pad + bW} y2={svgH - 10} stroke="#64748b" strokeWidth={0.5} />
-    </Svg>
+      {/* Zone 3 corner labels */}
+      <Text style={{ ...zd.label, left: ox + zwX / 2 - 4, top: oy + zwY / 2 - 4, color: zc['3'].text }}>3</Text>
+      <Text style={{ ...zd.label, left: ox + bW - zwX / 2 - 4, top: oy + zwY / 2 - 4, color: zc['3'].text }}>3</Text>
+      <Text style={{ ...zd.label, left: ox + zwX / 2 - 4, top: oy + bH - zwY / 2 - 4, color: zc['3'].text }}>3</Text>
+      <Text style={{ ...zd.label, left: ox + bW - zwX / 2 - 4, top: oy + bH - zwY / 2 - 4, color: zc['3'].text }}>3</Text>
+
+      {/* Zone 2 label */}
+      <Text style={{ ...zd.label, left: ox + bW / 2 - 16, top: oy + zwY / 2 - 4, color: zc['2'].text }}>Zone 2</Text>
+      {/* Zone 1 label */}
+      <Text style={{ ...zd.label, left: ox + bW / 2 - 16, top: oy + zwY + (zw2Y - zwY) / 2 - 4, color: zc['1'].text }}>Zone 1</Text>
+      {/* Zone 1' / interior */}
+      {zone1primeExists ? (
+        <Text style={{ ...zd.label, fontSize: 8, left: ox + bW / 2 - 20, top: oy + bH / 2 - 5, color: zc['1p'].text }}>1' (Field)</Text>
+      ) : (
+        <Text style={{ ...zd.label, fontSize: 6, left: ox + bW / 2 - 55, top: oy + bH / 2 - 4, color: zc['1'].text, fontStyle: 'italic' }}>No Zone 1' — entire interior is Zone 1</Text>
+      )}
+
+      {/* Dimension: 0.6h bracket */}
+      <View style={{ position: 'absolute', left: ox, top: oy - 16, width: zwX, borderBottomWidth: 0.8, borderBottomColor: zc['2'].border }} />
+      <View style={{ position: 'absolute', left: ox, top: oy - 20, width: 0.5, height: 8, backgroundColor: zc['2'].border }} />
+      <View style={{ position: 'absolute', left: ox + zwX, top: oy - 20, width: 0.5, height: 8, backgroundColor: zc['2'].border }} />
+      <Text style={{ ...zd.labelMono, left: ox, top: oy - 30, width: zwX, textAlign: 'center', color: zc['2'].text }}>{zoneWidth.toFixed(1)}' (0.6h)</Text>
+
+      {/* Dimension: second 0.6h bracket */}
+      <View style={{ position: 'absolute', left: ox + zwX, top: oy - 16, width: zw2X - zwX, borderBottomWidth: 0.8, borderBottomColor: zc['1'].border }} />
+      <View style={{ position: 'absolute', left: ox + zw2X, top: oy - 20, width: 0.5, height: 8, backgroundColor: zc['1'].border }} />
+      <Text style={{ ...zd.labelMono, left: ox + zwX, top: oy - 30, width: zw2X - zwX, textAlign: 'center', color: zc['1'].text }}>{zoneWidth.toFixed(1)}' (0.6h)</Text>
+
+      {/* Building length dimension */}
+      <View style={{ position: 'absolute', left: ox, bottom: 8, width: bW, borderBottomWidth: 0.5, borderBottomColor: '#64748b' }} />
+      <Text style={{ ...zd.dimText, left: ox, bottom: 0, width: bW }}>{length}' Length</Text>
+
+      {/* Building width dimension */}
+      <View style={{ position: 'absolute', left: 18, top: oy, width: 0.5, height: bH, backgroundColor: '#64748b' }} />
+      <Text style={{ ...zd.dimText, left: 2, top: oy + bH / 2 - 5, width: 30, fontSize: 6 }}>{width}' W</Text>
+
+      {/* Pressure legend */}
+      <View style={{ position: 'absolute', right: 8, top: 8, width: 150, backgroundColor: '#0f172a', borderRadius: 3, padding: 6, borderWidth: 0.5, borderColor: '#2563eb40' }}>
+        <Text style={zd.legendTitle}>Pressure Legend (psf)</Text>
+        {[
+          { key: '3', label: `Zone 3: ${Math.abs(pressures.zone3).toFixed(1)} psf`, clr: zc['3'] },
+          { key: '2', label: `Zone 2: ${Math.abs(pressures.zone2).toFixed(1)} psf`, clr: zc['2'] },
+          { key: '1', label: `Zone 1: ${Math.abs(pressures.zone1).toFixed(1)} psf`, clr: zc['1'] },
+          { key: '1p', label: `Zone 1': ${Math.abs(pressures.zone1prime).toFixed(1)} psf`, clr: zc['1p'] },
+        ].map(item => (
+          <View key={item.key} style={zd.legendRow}>
+            <View style={{ ...zd.legendSwatch, backgroundColor: item.clr.bg, borderWidth: 0.5, borderColor: item.clr.border }} />
+            <Text style={{ ...zd.legendText, color: item.clr.text }}>{item.label}</Text>
+          </View>
+        ))}
+        <Text style={{ fontSize: 5.5, color: '#94a3b8', marginTop: 2, fontFamily: 'Helvetica' }}>
+          h = {(zoneWidth / 0.6).toFixed(1)}' · zone width = 0.6h = {zoneWidth.toFixed(1)}'
+        </Text>
+
+        {fastenerResults && fastenerResults.length > 0 && (
+          <View style={{ marginTop: 6, paddingTop: 4, borderTopWidth: 0.5, borderTopColor: '#2563eb40' }}>
+            <Text style={{ ...zd.legendTitle, marginBottom: 2 }}>Fastener Spacing</Text>
+            {fastenerResults.map((fr: any, i: number) => (
+              <Text key={`fs_${i}`} style={{ fontSize: 6, fontFamily: 'Courier', color: '#94a3b8', marginBottom: 1 }}>
+                Zone {fr.zone}: {fr.FS_used_in}" o.c. × {fr.n_rows} rows
+              </Text>
+            ))}
+          </View>
+        )}
+      </View>
+    </View>
   );
 };
 

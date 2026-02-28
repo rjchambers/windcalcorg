@@ -33,7 +33,7 @@ const FastenerCalculatorPage = () => {
               <Wrench className="mr-1 h-4 w-4" /> Fastener Patterns
             </Button>
             <FastenerPdfExportButton />
-            <span className="hidden text-xs text-muted-foreground md:inline">RAS 117 · 128 · 127 · 137</span>
+            <span className="hidden text-xs text-muted-foreground md:inline">RAS 117 · 128 · 137</span>
           </div>
         </div>
       </header>

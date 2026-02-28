@@ -4,74 +4,153 @@ import {
   Text,
   View,
   StyleSheet,
+  Svg,
+  Rect,
+  Line,
 } from '@react-pdf/renderer';
-import type { FastenerInputs, FastenerOutputs, TAS105Outputs } from '@/lib/fastener-engine';
-
-// Use built-in PDF fonts to avoid external font loading issues
-const FONT_SANS = 'Helvetica';
-const FONT_MONO = 'Courier';
+import type { FastenerInputs, FastenerOutputs, TAS105Outputs, NOAZoneResult } from '@/lib/fastener-engine';
 
 const c = {
-  navy: '#0f1724',
-  navyLight: '#1a2332',
+  navy: '#0f172a',
+  slate: '#1e293b',
   blue: '#2563eb',
-  blueLight: '#3b82f6',
+  blueLight: '#93c5fd',
   white: '#ffffff',
   gray: '#94a3b8',
   grayLight: '#cbd5e1',
   grayDark: '#475569',
   red: '#dc2626',
   green: '#16a34a',
-  amber: '#ca8a04',
-  border: '#334155',
+  amber: '#d97706',
+  orange: '#ea580c',
+  border: '#cbd5e1',
+  bgLight: '#f1f5f9',
 };
 
 const s = StyleSheet.create({
-  page: { padding: 40, fontFamily: FONT_SANS, fontSize: 9, color: c.navy },
+  page: {
+    paddingTop: 54, paddingBottom: 72, paddingHorizontal: 54,
+    fontFamily: 'Helvetica', fontSize: 9, color: c.navy, backgroundColor: c.white,
+  },
   coverPage: { padding: 0, backgroundColor: c.navy },
   coverContent: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 60 },
-  coverTitle: { fontSize: 28, fontWeight: 700, color: c.white, marginBottom: 4 },
-  coverSub: { fontSize: 13, color: c.blueLight, marginBottom: 6 },
-  coverRef: { fontSize: 10, color: c.gray, marginBottom: 40 },
-  coverLine: { width: 80, height: 3, backgroundColor: c.blue, marginBottom: 40 },
+  coverTitle: { fontSize: 16, fontFamily: 'Helvetica-Bold', color: c.white, marginBottom: 4 },
+  coverSub: { fontSize: 11, color: c.blueLight, marginBottom: 24 },
+  coverLine: { width: 80, height: 3, backgroundColor: c.blue, marginBottom: 30 },
   coverMeta: { alignItems: 'center' },
   coverMetaText: { fontSize: 10, color: c.gray, marginBottom: 4 },
   coverDate: { fontSize: 11, color: c.grayLight, marginTop: 8 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', borderBottom: `1px solid ${c.border}`, paddingBottom: 8, marginBottom: 16 },
-  headerTitle: { fontSize: 10, fontWeight: 600, color: c.blue },
+  sealBox: {
+    border: `1.5pt dashed ${c.gray}`, width: 180, height: 180,
+    alignItems: 'center', justifyContent: 'center', marginTop: 30,
+  },
+  header: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    borderBottom: `1pt solid ${c.border}`, paddingBottom: 6, marginBottom: 14,
+  },
+  headerTitle: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: c.blue },
   headerRight: { fontSize: 7, color: c.grayDark },
-  sectionTitle: { fontSize: 12, fontWeight: 700, color: c.navy, marginBottom: 8, marginTop: 16 },
-  sectionSub: { fontSize: 10, fontWeight: 600, color: c.navy, marginBottom: 6, marginTop: 10 },
-  tableHeader: { flexDirection: 'row', backgroundColor: '#e2e8f0', borderBottom: `1px solid ${c.border}`, paddingVertical: 4 },
-  tableRow: { flexDirection: 'row', borderBottom: `0.5px solid #e2e8f0`, paddingVertical: 3 },
-  tableRowAlt: { flexDirection: 'row', borderBottom: `0.5px solid #e2e8f0`, paddingVertical: 3, backgroundColor: '#f8fafc' },
-  cell: { paddingHorizontal: 4, fontSize: 8, fontFamily: FONT_MONO },
-  cellHeader: { paddingHorizontal: 4, fontSize: 7, fontWeight: 600, color: c.grayDark },
-  derivation: { fontFamily: FONT_MONO, fontSize: 8, color: c.grayDark, lineHeight: 1.8, marginBottom: 4 },
-  derivationResult: { fontFamily: FONT_MONO, fontSize: 9, fontWeight: 600, color: c.navy },
-  paramGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
-  paramCard: { width: '23%', borderRadius: 4, border: `0.5px solid #e2e8f0`, padding: 6 },
-  paramLabel: { fontSize: 7, color: c.grayDark, marginBottom: 2 },
-  paramValue: { fontSize: 10, fontWeight: 600, color: c.navy, fontFamily: FONT_MONO },
-  warningBox: { flexDirection: 'row', gap: 6, padding: 6, marginBottom: 4, borderRadius: 3, border: `0.5px solid ${c.amber}`, backgroundColor: '#fffbeb' },
-  warningText: { fontSize: 8, color: c.grayDark, flex: 1 },
-  sigBlock: { marginTop: 40, paddingTop: 16, borderTop: `1px solid ${c.border}` },
-  sigRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 30 },
+  sectionHeader: {
+    fontSize: 9, fontFamily: 'Helvetica-Bold', color: c.navy,
+    backgroundColor: c.bgLight, padding: '4 6', marginBottom: 6, marginTop: 14,
+    borderLeft: `3pt solid ${c.blue}`, paddingLeft: 8,
+  },
+  sectionSub: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: c.navy, marginBottom: 4, marginTop: 10 },
+  calcLine: { fontFamily: 'Courier', fontSize: 8.5, color: c.slate, lineHeight: 1.6, marginLeft: 16 },
+  resultLine: { fontFamily: 'Courier-Bold', fontSize: 9, color: c.navy, marginLeft: 16 },
+  codeRef: { fontSize: 7.5, color: c.grayDark },
+  paramRow: { flexDirection: 'row', marginBottom: 2 },
+  paramLabel: { fontSize: 8, color: c.grayDark, width: '45%' },
+  paramValue: { fontSize: 8, fontFamily: 'Courier', color: c.navy, width: '35%' },
+  paramRef: { fontSize: 7, color: c.grayDark, width: '20%', textAlign: 'right' },
+  tableHeader: {
+    flexDirection: 'row', backgroundColor: '#e2e8f0',
+    borderBottom: `1pt solid ${c.border}`, paddingVertical: 3,
+  },
+  tableRow: { flexDirection: 'row', borderBottom: `0.5pt solid #e2e8f0`, paddingVertical: 2.5 },
+  tableRowAlt: { flexDirection: 'row', borderBottom: `0.5pt solid #e2e8f0`, paddingVertical: 2.5, backgroundColor: '#f8fafc' },
+  cell: { paddingHorizontal: 4, fontSize: 8, fontFamily: 'Courier' },
+  cellHeader: { paddingHorizontal: 4, fontSize: 7.5, fontFamily: 'Helvetica-Bold', color: c.grayDark },
+  passLabel: { color: c.green, fontFamily: 'Helvetica-Bold', fontSize: 8 },
+  failLabel: { color: c.red, fontFamily: 'Helvetica-Bold', fontSize: 8 },
+  warnLabel: { color: c.amber, fontFamily: 'Helvetica-Bold', fontSize: 8 },
+  warningBox: {
+    flexDirection: 'row', gap: 6, padding: 5, marginBottom: 3, borderRadius: 2,
+    border: `0.5pt solid #e2e8f0`, backgroundColor: '#fffbeb',
+  },
+  warningText: { fontSize: 7.5, color: c.grayDark, flex: 1 },
+  sigBlock: { marginTop: 40, paddingTop: 16, borderTop: `1pt solid ${c.border}` },
+  sigRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 24 },
   sigField: { width: '45%' },
-  sigLine: { borderBottom: `1px solid ${c.navy}`, marginBottom: 4 },
-  sigLabel: { fontSize: 8, color: c.grayDark },
-  footer: { position: 'absolute', bottom: 20, left: 40, right: 40, flexDirection: 'row', justifyContent: 'space-between', fontSize: 7, color: c.gray },
+  sigLine: { borderBottom: `1pt solid ${c.navy}`, marginBottom: 4, height: 20 },
+  sigLabel: { fontSize: 7.5, color: c.grayDark },
+  footer: {
+    position: 'absolute', bottom: 30, left: 54, right: 54,
+    flexDirection: 'row', justifyContent: 'space-between', fontSize: 7, color: c.gray,
+    borderTop: `0.5pt solid #e2e8f0`, paddingTop: 4,
+  },
   disclaimer: { fontSize: 7, color: c.grayDark, marginTop: 16, lineHeight: 1.6 },
 });
 
 const SYSTEM_LABELS: Record<string, string> = {
-  modified_bitumen: 'Modified Bitumen',
+  modified_bitumen: 'Modified Bitumen / BUR',
   single_ply: 'Single-Ply (TPO/EPDM/PVC)',
-  adhered: 'Adhered System',
-  tile: 'Tile (RAS 127)',
-  shingle: 'Shingle',
-  metal: 'Metal Panel',
+  adhered: 'Adhered Membrane',
 };
+
+const DECK_LABELS: Record<string, string> = {
+  plywood: 'Plywood',
+  structural_concrete: 'Structural Concrete',
+  steel_deck: 'Steel Deck',
+  wood_plank: 'Wood Plank',
+  lw_concrete: 'LW Insulating Concrete',
+};
+
+const ParamRow = ({ label, value, ref: codeRef }: { label: string; value: string; ref?: string }) => (
+  <View style={s.paramRow}>
+    <Text style={s.paramLabel}>{label}</Text>
+    <Text style={s.paramValue}>{value}</Text>
+    {codeRef && <Text style={s.paramRef}>[{codeRef}]</Text>}
+  </View>
+);
+
+const PageFooter = ({ rasRef }: { rasRef: string }) => (
+  <View style={s.footer} fixed>
+    <Text>{rasRef} · RAS 128-20 · ASCE 7-22 · FBC 8th Ed. (2023)</Text>
+    <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
+  </View>
+);
+
+const PageHeader = ({ projectName, rightText, now }: { projectName: string; rightText: string; now: string }) => (
+  <View style={s.header}>
+    <Text style={s.headerTitle}>WindCalc Pro · FastenerCalc HVHZ — {projectName}</Text>
+    <Text style={s.headerRight}>{rightText} · {now}</Text>
+  </View>
+);
+
+// ──── Basis helpers ────
+
+function basisLabel(basis: string): string {
+  switch (basis) {
+    case 'prescriptive': return 'NOA Prescriptive';
+    case 'rational_analysis': return 'RAS 117 Rational';
+    case 'exceeds_300pct': return 'Exceeds 300%';
+    case 'asterisked_fail': return 'Asterisked Fail';
+    default: return basis;
+  }
+}
+
+function basisColor(basis: string): string {
+  switch (basis) {
+    case 'prescriptive': return c.blue;
+    case 'rational_analysis': return c.amber;
+    case 'exceeds_300pct': return c.orange;
+    case 'asterisked_fail': return c.red;
+    default: return c.grayDark;
+  }
+}
+
+// ──── Main Component ────
 
 interface Props {
   inputs: FastenerInputs;
@@ -79,6 +158,8 @@ interface Props {
   tas105Outputs?: TAS105Outputs | null;
   projectName?: string;
   preparedBy?: string;
+  jobAddress?: string;
+  peNumber?: string;
 }
 
 const FastenerCalcPdfReport = ({
@@ -87,240 +168,347 @@ const FastenerCalcPdfReport = ({
   tas105Outputs,
   projectName = 'Untitled Project',
   preparedBy = '',
+  jobAddress = '',
+  peNumber = '',
 }: Props) => {
   const now = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const rasRef = inputs.systemType === 'single_ply' ? 'RAS 137' : 'RAS 117';
+  const rasRef = inputs.systemType === 'single_ply' ? 'RAS 137-20' : 'RAS 117-20';
+  const NW = inputs.sheetWidth_in - inputs.lapWidth_in;
+  const mdpAbs = Math.abs(inputs.noa.mdp_psf);
+  const maxFactor = outputs.maxExtrapolationFactor;
+  const countyLabel = inputs.county === 'miami_dade' ? 'Miami-Dade County — HVHZ' : inputs.county === 'broward' ? 'Broward County — HVHZ' : 'Non-HVHZ';
 
   return (
-    <Document title={`FastenerCalc HVHZ — ${projectName}`} author="FastenerCalc HVHZ">
-      {/* ── Cover Page ── */}
+    <Document title={`FastenerCalc HVHZ — ${projectName}`} author="WindCalc Pro">
+
+      {/* ══════════════ PAGE 1: COVER ══════════════ */}
       <Page size="LETTER" style={s.coverPage}>
         <View style={s.coverContent}>
-          <Text style={s.coverTitle}>FastenerCalc HVHZ</Text>
-          <Text style={s.coverSub}>Uniform Roofing Application — Fastener Pattern Report</Text>
-          <Text style={s.coverRef}>FBC 8th Ed. · ASCE 7-22 Ch. 30 C&C · {rasRef} · TAS 105</Text>
+          <Text style={{ fontSize: 10, color: c.gray, marginBottom: 8 }}>WindCalc Pro</Text>
+          <Text style={s.coverTitle}>ROOF COVERING ATTACHMENT CALCULATIONS</Text>
+          <Text style={s.coverSub}>FBC 8th Edition (2023) · ASCE 7-22 · {rasRef} · TAS 105</Text>
           <View style={s.coverLine} />
           <View style={s.coverMeta}>
-            <Text style={{ fontSize: 16, color: c.white, fontWeight: 600, marginBottom: 12 }}>{projectName}</Text>
+            <Text style={{ fontSize: 14, color: c.white, fontFamily: 'Helvetica-Bold', marginBottom: 12 }}>{projectName}</Text>
+            {jobAddress ? <Text style={s.coverMetaText}>Address: {jobAddress}</Text> : null}
+            <Text style={s.coverMetaText}>County: {countyLabel}</Text>
+            <Text style={s.coverMetaText}>Construction: {inputs.constructionType}</Text>
             {preparedBy ? <Text style={s.coverMetaText}>Prepared by: {preparedBy}</Text> : null}
-            <Text style={s.coverMetaText}>System: {SYSTEM_LABELS[inputs.systemType] ?? inputs.systemType}</Text>
-            <Text style={s.coverMetaText}>Construction: {inputs.constructionType} · {inputs.county === 'miami_dade' ? 'Miami-Dade HVHZ' : inputs.county === 'broward' ? 'Broward HVHZ' : 'Non-HVHZ'}</Text>
+            {peNumber ? <Text style={s.coverMetaText}>FL P.E. No.: {peNumber}</Text> : null}
             <Text style={s.coverDate}>{now}</Text>
           </View>
-        </View>
-        <View style={{ ...s.footer, bottom: 30 }}>
-          <Text style={{ color: c.gray, fontSize: 7 }}>Generated by FastenerCalc HVHZ — For review by licensed PE</Text>
-        </View>
-      </Page>
-
-      {/* ── Page 2: Inputs + Velocity Pressure ── */}
-      <Page size="LETTER" style={s.page}>
-        <View style={s.header}>
-          <Text style={s.headerTitle}>FastenerCalc HVHZ — {projectName}</Text>
-          <Text style={s.headerRight}>{rasRef} · {now}</Text>
-        </View>
-
-        <Text style={s.sectionTitle}>1. Input Parameters</Text>
-        <Text style={s.sectionSub}>Site &amp; Wind</Text>
-        <View style={s.paramGrid}>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Wind Speed (V)</Text><Text style={s.paramValue}>{inputs.V} mph</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Exposure</Text><Text style={s.paramValue}>{inputs.exposureCategory}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Risk Cat.</Text><Text style={s.paramValue}>{inputs.riskCategory}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Enclosure</Text><Text style={s.paramValue}>{inputs.enclosure}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Kzt</Text><Text style={s.paramValue}>{inputs.Kzt}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Kd</Text><Text style={s.paramValue}>{inputs.Kd}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Ke</Text><Text style={s.paramValue}>{inputs.Ke}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>h</Text><Text style={s.paramValue}>{inputs.h} ft</Text></View>
-        </View>
-
-        <Text style={s.sectionSub}>Building Geometry</Text>
-        <View style={s.paramGrid}>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Length</Text><Text style={s.paramValue}>{inputs.buildingLength} ft</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Width</Text><Text style={s.paramValue}>{inputs.buildingWidth} ft</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Roof Type</Text><Text style={s.paramValue}>{inputs.roofType}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Pitch</Text><Text style={s.paramValue}>{inputs.pitchDegrees}°</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Parapet</Text><Text style={s.paramValue}>{inputs.parapetHeight} ft</Text></View>
-        </View>
-
-        <Text style={s.sectionSub}>Roof System</Text>
-        <View style={s.paramGrid}>
-          <View style={s.paramCard}><Text style={s.paramLabel}>System</Text><Text style={s.paramValue}>{SYSTEM_LABELS[inputs.systemType] ?? inputs.systemType}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Deck</Text><Text style={s.paramValue}>{inputs.deckType}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Construction</Text><Text style={s.paramValue}>{inputs.constructionType}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Sheet Width</Text><Text style={s.paramValue}>{inputs.sheetWidth_in}"</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Lap Width</Text><Text style={s.paramValue}>{inputs.lapWidth_in}"</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Fy</Text><Text style={s.paramValue}>{inputs.Fy_lbf} lbf</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>Fy Source</Text><Text style={s.paramValue}>{inputs.fySource === 'tas105' ? 'TAS 105' : 'NOA'}</Text></View>
-          <View style={s.paramCard}><Text style={s.paramLabel}>NOA MDP</Text><Text style={s.paramValue}>{inputs.noaMDP_psf} psf</Text></View>
-        </View>
-
-        {/* ── Velocity Pressure Derivation ── */}
-        <Text style={s.sectionTitle}>2. Velocity Pressure Derivation (ASD)</Text>
-        <Text style={s.derivation}>Kh = {outputs.Kh}  (Table 26.10-1, Exp. {inputs.exposureCategory}, h = {inputs.h} ft)</Text>
-        <Text style={s.derivation}>qh_ASD = 0.00256 × Kh × Kzt × Ke × V² × 0.6</Text>
-        <Text style={s.derivation}>       = 0.00256 × {outputs.Kh} × {inputs.Kzt} × {inputs.Ke} × {inputs.V}² × 0.6</Text>
-        <Text style={s.derivationResult}>qh_ASD = {outputs.qh_ASD.toFixed(2)} psf</Text>
-
-        <Text style={{ ...s.derivation, marginTop: 8 }}>Zone width = {outputs.zonePressures.zoneWidth_ft} ft</Text>
-
-        {/* ── Zone Pressures ── */}
-        <Text style={s.sectionTitle}>3. Zone Pressures (C&C — GCp − GCpi)</Text>
-        <View style={s.tableHeader}>
-          <Text style={{ ...s.cellHeader, width: '15%' }}>Zone</Text>
-          <Text style={{ ...s.cellHeader, width: '25%' }}>P (psf)</Text>
-          <Text style={{ ...s.cellHeader, width: '25%' }}>MDP Check</Text>
-          <Text style={{ ...s.cellHeader, width: '20%' }}>Extrap.</Text>
-          <Text style={{ ...s.cellHeader, width: '15%' }}>Width (ft)</Text>
-        </View>
-        {outputs.fastenerResults.map((r, i) => (
-          <View key={r.zone} style={i % 2 ? s.tableRowAlt : s.tableRow}>
-            <Text style={{ ...s.cell, width: '15%', fontWeight: 600 }}>{r.zone === "1'" ? "1' (Field)" : `Zone ${r.zone}`}</Text>
-            <Text style={{ ...s.cell, width: '25%', color: c.red }}>{r.P_psf.toFixed(1)}</Text>
-            <Text style={{ ...s.cell, width: '25%', color: r.noaCheck === 'prescriptive' ? c.green : r.noaCheck === 'enhanced' ? c.amber : c.red }}>
-              {r.noaCheck === 'prescriptive' ? 'OK ≤ MDP' : r.noaCheck === 'enhanced' ? 'Enhanced' : 'FAIL'}
-            </Text>
-            <Text style={{ ...s.cell, width: '20%' }}>{r.extrapolationFactor > 1 ? `${r.extrapolationFactor}×` : '—'}</Text>
-            <Text style={{ ...s.cell, width: '15%' }}>{outputs.zonePressures.zoneWidth_ft}</Text>
+          <View style={s.sealBox}>
+            <Text style={{ fontSize: 8, color: c.gray }}>AFFIX ENGINEER'S SEAL HERE</Text>
+            <Text style={{ fontSize: 7, color: c.gray, marginTop: 4 }}>2.5" x 2.5"</Text>
           </View>
-        ))}
-
-        <View style={s.footer} fixed>
-          <Text>FastenerCalc HVHZ — {rasRef}</Text>
-          <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} / ${totalPages}`} />
         </View>
-      </Page>
-
-      {/* ── Page 3: Fastener Pattern + Per-Zone Derivation ── */}
-      <Page size="LETTER" style={s.page}>
-        <View style={s.header}>
-          <Text style={s.headerTitle}>FastenerCalc HVHZ — {projectName}</Text>
-          <Text style={s.headerRight}>Fastener Patterns · {now}</Text>
+        <View style={{ ...s.footer, bottom: 20 }}>
+          <Text style={{ color: c.gray, fontSize: 6.5 }}>Generated by FastenerCalc HVHZ — For review by licensed PE</Text>
         </View>
-
-        <Text style={s.sectionTitle}>4. Fastener Pattern Results — {rasRef}</Text>
-        <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 4 }}>
-          Fy = {inputs.Fy_lbf} lbf ({inputs.fySource === 'tas105' ? 'TAS 105 MCRF' : 'NOA'}) · NW = {inputs.sheetWidth_in - inputs.lapWidth_in}" · Initial rows = {inputs.initialRows}
+        <Text style={{ position: 'absolute', bottom: 50, left: 54, right: 54, fontSize: 6.5, color: c.gray, lineHeight: 1.5 }}>
+          DISCLAIMER: FastenerCalc HVHZ provides calculations as a design aid based on the Florida Building Code 8th Edition (2023), ASCE 7-22, and the Florida Test Protocols for High-Velocity Hurricane Zones (RAS 117, RAS 128, TAS 105). All results must be reviewed, verified, and approved by a licensed Professional Engineer or Registered Architect responsible for the project. These calculations must be signed and sealed by a qualified design professional prior to permit submission in Miami-Dade and Broward Counties. WindCalc Pro LLC assumes no liability for roofing system performance, permit approval, or construction outcomes. The Engineer of Record is solely responsible for verifying the applicability of all referenced standards to specific project conditions.
         </Text>
+      </Page>
 
-        <View style={s.tableHeader}>
-          <Text style={{ ...s.cellHeader, width: '10%' }}>Zone</Text>
-          <Text style={{ ...s.cellHeader, width: '12%' }}>P (psf)</Text>
-          <Text style={{ ...s.cellHeader, width: '10%' }}>n Rows</Text>
-          <Text style={{ ...s.cellHeader, width: '12%' }}>RS (in)</Text>
-          <Text style={{ ...s.cellHeader, width: '12%' }}>FS Calc</Text>
-          <Text style={{ ...s.cellHeader, width: '12%' }}>FS Used</Text>
-          <Text style={{ ...s.cellHeader, width: '12%' }}>D/R</Text>
-          <Text style={{ ...s.cellHeader, width: '10%' }}>A (ft²)</Text>
-          <Text style={{ ...s.cellHeader, width: '10%' }}>½ Sheet</Text>
-        </View>
-        {outputs.fastenerResults.map((r, i) => (
-          <View key={r.zone} style={i % 2 ? s.tableRowAlt : s.tableRow}>
-            <Text style={{ ...s.cell, width: '10%', fontWeight: 600 }}>{r.zone}</Text>
-            <Text style={{ ...s.cell, width: '12%', color: c.red }}>{r.P_psf.toFixed(1)}</Text>
-            <Text style={{ ...s.cell, width: '10%' }}>{r.n_rows}</Text>
-            <Text style={{ ...s.cell, width: '12%' }}>{r.RS_in}</Text>
-            <Text style={{ ...s.cell, width: '12%' }}>{r.FS_calculated_in}"</Text>
-            <Text style={{ ...s.cell, width: '12%', fontWeight: 600 }}>{r.FS_used_in}"</Text>
-            <Text style={{ ...s.cell, width: '12%', color: r.demandRatio > 0.95 ? c.red : r.demandRatio > 0.75 ? c.amber : c.green }}>{(r.demandRatio * 100).toFixed(0)}%</Text>
-            <Text style={{ ...s.cell, width: '10%' }}>{r.A_fastener_ft2}</Text>
-            <Text style={{ ...s.cell, width: '10%' }}>{r.halfSheetRequired ? 'YES' : '—'}</Text>
-          </View>
-        ))}
+      {/* ══════════════ PAGE 2: PROJECT CRITERIA ══════════════ */}
+      <Page size="LETTER" style={s.page}>
+        <PageHeader projectName={projectName} rightText="Project Criteria" now={now} />
 
-        {/* Per-Zone Derivation Chain */}
-        <Text style={s.sectionTitle}>5. Per-Zone Derivation Chain</Text>
+        <Text style={s.sectionHeader}>SITE INFORMATION</Text>
+        <ParamRow label="Location:" value={`${jobAddress || '—'} (${countyLabel})`} />
+        <ParamRow label="Construction Type:" value={inputs.constructionType} />
+        <ParamRow label="Risk Category:" value={inputs.riskCategory} ref="Table 1.5-1" />
+
+        <Text style={s.sectionHeader}>WIND PARAMETERS</Text>
+        <ParamRow label="Basic Wind Speed:" value={`${inputs.V} mph`} ref="Fig. 26.5-1A" />
+        <ParamRow label="Exposure Category:" value={inputs.exposureCategory} ref="§26.7.3" />
+        <ParamRow label="Enclosure Class:" value={inputs.enclosure} ref="§26.2" />
+        <ParamRow label="Building Height:" value={`h = ${inputs.h} ft (mean roof)`} />
+        <ParamRow label="Slope:" value="≤ 7° (low-slope)" />
+
+        <Text style={s.sectionHeader}>WIND COEFFICIENTS</Text>
+        <ParamRow label="Kh:" value={`${outputs.Kh}`} ref="Table 26.10-1" />
+        <ParamRow label="Kzt:" value={`${inputs.Kzt}`} ref="§26.8" />
+        <ParamRow label="Kd:" value={`${inputs.Kd}`} ref="Table 26.6-1" />
+        <ParamRow label="Ke:" value={`${inputs.Ke}`} ref="Table 26.9-1" />
+        <ParamRow label="GCpi:" value={`+${outputs.GCpi}`} ref="Table 26.13-1" />
+
+        <Text style={s.sectionHeader}>VELOCITY PRESSURE (ASD)</Text>
+        <Text style={s.calcLine}>qh = 0.00256 x Kh x Kzt x Ke x V^2 x 0.6</Text>
+        <Text style={s.calcLine}>   = 0.00256 x {outputs.Kh} x {inputs.Kzt} x {inputs.Ke} x {inputs.V}^2 x 0.6</Text>
+        <Text style={s.resultLine}>qh = {outputs.qh_ASD.toFixed(2)} psf</Text>
+
+        <Text style={s.sectionHeader}>PRODUCT APPROVAL</Text>
+        <ParamRow label="Approval Type:" value={inputs.noa.approvalType === 'miami_dade_noa' ? 'Miami-Dade NOA' : 'FL Product Approval'} />
+        <ParamRow label="Approval Number:" value={inputs.noa.approvalNumber || '—'} />
+        <ParamRow label="Manufacturer:" value={inputs.noa.manufacturer || '—'} />
+        <ParamRow label="Product/System:" value={`${inputs.noa.productName || '—'} / ${inputs.noa.systemNumber || '—'}`} />
+        <ParamRow label="Max Design Pressure:" value={`${mdpAbs} psf (from NOA)`} />
+        <ParamRow label="Extrapolation:" value={inputs.noa.asterisked ? 'Not Permitted (Asterisked)' : 'Permitted'} />
+
+        <Text style={s.sectionHeader}>FASTENER DATA</Text>
+        <ParamRow label="Fy (Design):" value={`${inputs.Fy_lbf.toFixed(2)} lbf [${inputs.fySource === 'tas105' ? 'TAS 105 Field Test' : 'NOA'}]`} />
+        <ParamRow label="Sheet Width (SW):" value={`${inputs.sheetWidth_in}"`} />
+        <ParamRow label="Lap Width (LW):" value={`${inputs.lapWidth_in}"`} />
+        <ParamRow label="Net Width (NW):" value={`${NW.toFixed(3)}"`} />
+
+        <Text style={s.sectionHeader}>DECK</Text>
+        <ParamRow label="Deck Type:" value={DECK_LABELS[inputs.deckType] || inputs.deckType} />
+
+        <PageFooter rasRef={rasRef} />
+      </Page>
+
+      {/* ══════════════ PAGE 3: DESIGN PRESSURE DERIVATION ══════════════ */}
+      <Page size="LETTER" style={s.page}>
+        <PageHeader projectName={projectName} rightText="Design Pressures" now={now} />
+
+        <Text style={s.sectionHeader}>DESIGN WIND PRESSURES — LOW-SLOPE ROOF</Text>
+        <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 6, marginLeft: 8 }}>
+          Per ASCE 7-22 §30.3 (C&C, h ≤ 60 ft, θ ≤ 7°) · EWA = 10 ft²
+        </Text>
+        <Text style={s.calcLine}>p = qh x Kd x (GCp - GCpi)</Text>
+
         {outputs.fastenerResults.map(r => {
-          const NW = inputs.sheetWidth_in - inputs.lapWidth_in;
+          const GCp = r.zone === "1'" ? -0.90 : r.zone === '1' ? -1.70 : r.zone === '2' ? -2.30 : -3.20;
+          const zoneLabel = r.zone === "1'" ? "Zone 1' (Field)" : `Zone ${r.zone}`;
+          const figRef = `Fig. 30.3-2A, Zone ${r.zone}`;
           return (
-            <View key={`deriv-${r.zone}`} style={{ marginBottom: 10 }}>
-              <Text style={s.sectionSub}>Zone {r.zone}{r.zone === "1'" ? ' (Interior Field)' : ''}</Text>
-              <Text style={s.derivation}>P = {r.P_psf.toFixed(1)} psf (C&C, ASD)</Text>
-              <Text style={s.derivation}>NW = {inputs.sheetWidth_in}" − {inputs.lapWidth_in}" = {NW}"</Text>
-              <Text style={s.derivation}>n = {r.n_rows} rows → RS = {r.halfSheetRequired ? `${NW / 2}" / (${r.n_rows} − 1)` : `${NW}" / (${r.n_rows} − 1)`} = {r.RS_in}"</Text>
-              <Text style={s.derivation}>FS = (Fy × 144) / (P × RS) = ({inputs.Fy_lbf} × 144) / ({r.P_psf.toFixed(1)} × {r.RS_in}) = {r.FS_calculated_in}"</Text>
-              <Text style={s.derivation}>FS used = {r.FS_used_in}" (rounded ½" down, min 4", max 12")</Text>
-              <Text style={s.derivation}>A = ({r.FS_used_in} × {r.RS_in}) / 144 = {r.A_fastener_ft2} ft²</Text>
-              <Text style={s.derivation}>F_demand = {r.P_psf.toFixed(1)} × {r.A_fastener_ft2} = {r.F_demand_lbf} lbf</Text>
-              <Text style={s.derivationResult}>D/R = {r.F_demand_lbf} / {inputs.Fy_lbf} = {(r.demandRatio * 100).toFixed(0)}%{r.halfSheetRequired ? '  [HALF SHEET]' : ''}</Text>
+            <View key={r.zone} style={{ marginBottom: 6 }}>
+              <Text style={s.sectionSub}>{zoneLabel}</Text>
+              <Text style={s.calcLine}>GCp = {GCp.toFixed(2)}  [{figRef}]</Text>
+              <Text style={s.calcLine}>p = {outputs.qh_ASD.toFixed(2)} x {inputs.Kd} x ({GCp.toFixed(2)} - (+{outputs.GCpi}))</Text>
+              <Text style={s.calcLine}>  = {outputs.qh_ASD.toFixed(2)} x {inputs.Kd} x {(GCp - outputs.GCpi).toFixed(2)}</Text>
+              <Text style={s.resultLine}>p = {r.P_psf.toFixed(2)} psf</Text>
             </View>
           );
         })}
 
-        <View style={s.footer} fixed>
-          <Text>FastenerCalc HVHZ — {rasRef}</Text>
-          <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} / ${totalPages}`} />
-        </View>
+        <Text style={s.sectionHeader}>ZONE BOUNDARY DIMENSIONS</Text>
+        <Text style={s.calcLine}>Zone width = 0.6 x h = 0.6 x {inputs.h} = {outputs.zonePressures.zoneWidth_ft.toFixed(2)} ft  [Fig. 30.3-2A]</Text>
+
+        <Text style={s.sectionHeader}>NOA / PRODUCT APPROVAL COMPATIBILITY</Text>
+        <Text style={s.calcLine}>Assembly: {inputs.noa.productName || '—'} ({inputs.noa.approvalNumber || '—'})</Text>
+        <Text style={s.calcLine}>NOA MDP: {mdpAbs} psf — Zone 1 prescriptive attachment capacity</Text>
+        <Text style={{ ...s.calcLine, marginTop: 4 }}> </Text>
+        {outputs.noaResults.map(nr => (
+          <Text key={nr.zone} style={{ ...s.calcLine, color: basisColor(nr.basis) }}>
+            Zone {nr.zone}: {Math.abs(nr.P_psf).toFixed(1)} psf / {mdpAbs} psf = {nr.extrapFactor.toFixed(2)}x → {basisLabel(nr.basis).toUpperCase()}
+          </Text>
+        ))}
+        <Text style={{ ...s.calcLine, marginTop: 4 }}>
+          Max factor applied: {maxFactor.toFixed(2)}x (limit: 3.00x per RAS 137 §6.1.3)
+        </Text>
+
+        <PageFooter rasRef={rasRef} />
       </Page>
 
-      {/* ── Page 4: Insulation + Tile + TAS 105 + Warnings + Signature ── */}
+      {/* ══════════════ PAGE 4: ZONE DIAGRAM ══════════════ */}
       <Page size="LETTER" style={s.page}>
-        <View style={s.header}>
-          <Text style={s.headerTitle}>FastenerCalc HVHZ — {projectName}</Text>
-          <Text style={s.headerRight}>Supplemental · {now}</Text>
-        </View>
+        <PageHeader projectName={projectName} rightText="Zone Layout" now={now} />
 
-        {/* Insulation Board */}
-        <Text style={s.sectionTitle}>6. Insulation Board Fasteners (RAS 117 §8)</Text>
-        <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 6 }}>
-          Board size: {inputs.boardLength_ft}' × {inputs.boardWidth_ft}' = {inputs.boardLength_ft * inputs.boardWidth_ft} ft² · Fy = {inputs.insulation_Fy_lbf || inputs.Fy_lbf} lbf
+        <Text style={s.sectionHeader}>FIGURE 1 — ROOF ZONE LAYOUT</Text>
+        <Text style={{ fontSize: 7.5, color: c.grayDark, marginBottom: 8, marginLeft: 8 }}>
+          Per ASCE 7-22 Fig. 30.3-2A · Low-slope (θ ≤ 7°)
         </Text>
+
+        <ZoneDiagramSvg
+          length={inputs.buildingLength}
+          width={inputs.buildingWidth}
+          zoneWidth={outputs.zonePressures.zoneWidth_ft}
+          pressures={outputs.zonePressures}
+          mdp={mdpAbs}
+        />
+
+        <PageFooter rasRef={rasRef} />
+      </Page>
+
+      {/* ══════════════ PAGE 5: RAS 117 DERIVATION ══════════════ */}
+      <Page size="LETTER" style={s.page}>
+        <PageHeader projectName={projectName} rightText="Fastener Derivation" now={now} />
+
+        <Text style={s.sectionHeader}>BASE SHEET ATTACHMENT — FASTENER SPACING CALCULATIONS</Text>
+        <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 4, marginLeft: 8 }}>
+          Per {rasRef} · {inputs.noa.productName || 'Assembly'} · Fy = {inputs.Fy_lbf} lbf ({inputs.fySource === 'tas105' ? 'TAS 105' : 'NOA'})
+        </Text>
+
+        <Text style={s.sectionSub}>Sheet Geometry</Text>
+        <Text style={s.calcLine}>SW = {inputs.sheetWidth_in}"  LW = {inputs.lapWidth_in}"</Text>
+        <Text style={s.calcLine}>NW = SW - LW = {inputs.sheetWidth_in} - {inputs.lapWidth_in} = {NW.toFixed(3)}" = {(NW / 12).toFixed(4)} ft</Text>
+        <Text style={{ ...s.calcLine, marginTop: 2 }}>FS = (Fy x 144) / (P x RS)  where RS = NW / (n - 1)</Text>
+
+        {outputs.fastenerResults.map(r => {
+          const noaBasis = r.noaCheck.basis;
+          const header = noaBasis === 'prescriptive'
+            ? `Zone ${r.zone} — NOA PRESCRIPTIVE`
+            : `Zone ${r.zone} — RAS 117 RATIONAL ANALYSIS`;
+          const subtext = noaBasis === 'rational_analysis'
+            ? `Pressure ${r.P_psf.toFixed(1)} psf exceeds NOA MDP ${mdpAbs} psf (factor: ${r.noaCheck.extrapFactor.toFixed(2)}x). Within 3.0x limit per RAS 137 §6.1.3.`
+            : noaBasis === 'prescriptive'
+            ? `Pressure ${r.P_psf.toFixed(1)} psf within NOA MDP ${mdpAbs} psf. Prescriptive pattern applies.`
+            : '';
+          const effNW = r.halfSheetRequired ? NW / 2 : NW;
+          return (
+            <View key={`deriv-${r.zone}`} style={{ marginBottom: 8 }}>
+              <Text style={{ ...s.sectionSub, borderBottom: `0.5pt solid ${c.border}`, paddingBottom: 2 }}>{header}</Text>
+              {subtext ? <Text style={{ fontSize: 7, color: c.grayDark, marginBottom: 2, marginLeft: 16 }}>{subtext}</Text> : null}
+              <Text style={s.calcLine}>P = {r.P_psf.toFixed(1)} psf</Text>
+              <Text style={s.calcLine}>n = {r.n_rows} rows → RS = {effNW.toFixed(3)} / ({r.n_rows} - 1) = {r.RS_in}"</Text>
+              <Text style={s.calcLine}>FS = ({inputs.Fy_lbf} x 144) / ({r.P_psf.toFixed(1)} x {r.RS_in}) = {r.FS_calculated_in}"</Text>
+              <Text style={s.calcLine}>FS used = {r.FS_used_in}" (rounded 1/2" down, min 4", max 12")</Text>
+              <Text style={s.calcLine}>A = ({r.FS_used_in} x {r.RS_in}) / 144 = {r.A_fastener_ft2} ft²</Text>
+              <Text style={s.calcLine}>F_demand = {r.P_psf.toFixed(1)} x {r.A_fastener_ft2} = {r.F_demand_lbf} lbf</Text>
+              <Text style={s.resultLine}>D/R = {r.F_demand_lbf} / {inputs.Fy_lbf} = {(r.demandRatio * 100).toFixed(0)}%{r.halfSheetRequired ? '  [HALF SHEET]' : ''}</Text>
+            </View>
+          );
+        })}
+
+        <PageFooter rasRef={rasRef} />
+      </Page>
+
+      {/* ══════════════ PAGE 6: PATTERN SUMMARY ══════════════ */}
+      <Page size="LETTER" style={s.page}>
+        <PageHeader projectName={projectName} rightText="Pattern Summary" now={now} />
+
+        <Text style={s.sectionHeader}>FASTENER PATTERN SUMMARY</Text>
+        <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 2, marginLeft: 8 }}>
+          Base Sheet: {inputs.noa.productName || SYSTEM_LABELS[inputs.systemType]}
+        </Text>
+        <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 6, marginLeft: 8 }}>
+          Per {rasRef} | NOA: {inputs.noa.approvalNumber || '—'} | MDP: {mdpAbs} psf
+        </Text>
+
+        {/* Results table */}
         <View style={s.tableHeader}>
-          <Text style={{ ...s.cellHeader, width: '15%' }}>Zone</Text>
-          <Text style={{ ...s.cellHeader, width: '20%' }}>P (psf)</Text>
-          <Text style={{ ...s.cellHeader, width: '20%' }}>N Req'd</Text>
-          <Text style={{ ...s.cellHeader, width: '20%' }}>N Used</Text>
-          <Text style={{ ...s.cellHeader, width: '25%' }}>Layout</Text>
+          <Text style={{ ...s.cellHeader, width: '10%' }}>Zone</Text>
+          <Text style={{ ...s.cellHeader, width: '12%' }}>P (psf)</Text>
+          <Text style={{ ...s.cellHeader, width: '14%' }}>Basis</Text>
+          <Text style={{ ...s.cellHeader, width: '10%' }}>n Rows</Text>
+          <Text style={{ ...s.cellHeader, width: '12%' }}>FS Calc</Text>
+          <Text style={{ ...s.cellHeader, width: '12%' }}>FS Used</Text>
+          <Text style={{ ...s.cellHeader, width: '10%' }}>D/R</Text>
+          <Text style={{ ...s.cellHeader, width: '10%' }}>Extrap</Text>
+          <Text style={{ ...s.cellHeader, width: '10%' }}>1/2 Sht</Text>
         </View>
-        {outputs.insulationResults.map((r, i) => (
+        {outputs.fastenerResults.map((r, i) => (
           <View key={r.zone} style={i % 2 ? s.tableRowAlt : s.tableRow}>
-            <Text style={{ ...s.cell, width: '15%', fontWeight: 600 }}>{r.zone}</Text>
-            <Text style={{ ...s.cell, width: '20%' }}>{r.P_psf}</Text>
-            <Text style={{ ...s.cell, width: '20%' }}>{r.N_required}</Text>
-            <Text style={{ ...s.cell, width: '20%', fontWeight: 600 }}>{r.N_used}</Text>
-            <Text style={{ ...s.cell, width: '25%' }}>{r.layout}</Text>
+            <Text style={{ ...s.cell, width: '10%', fontFamily: 'Helvetica-Bold' }}>{r.zone}</Text>
+            <Text style={{ ...s.cell, width: '12%' }}>{r.P_psf.toFixed(1)}</Text>
+            <Text style={{ ...s.cell, width: '14%', color: basisColor(r.noaCheck.basis), fontSize: 7 }}>
+              {r.noaCheck.basis === 'prescriptive' ? 'NOA' : 'RAS 117'}
+            </Text>
+            <Text style={{ ...s.cell, width: '10%' }}>{r.n_rows}</Text>
+            <Text style={{ ...s.cell, width: '12%' }}>{r.FS_calculated_in}"</Text>
+            <Text style={{ ...s.cell, width: '12%', fontFamily: 'Courier-Bold' }}>{r.FS_used_in}"</Text>
+            <Text style={{ ...s.cell, width: '10%', color: r.demandRatio > 0.95 ? c.red : r.demandRatio > 0.75 ? c.amber : c.green }}>
+              {(r.demandRatio * 100).toFixed(0)}%
+            </Text>
+            <Text style={{ ...s.cell, width: '10%' }}>{r.noaCheck.extrapFactor.toFixed(2)}x</Text>
+            <Text style={{ ...s.cell, width: '10%' }}>{r.halfSheetRequired ? 'YES' : '—'}</Text>
           </View>
         ))}
 
-        {/* Tile Results */}
-        {outputs.tileResults && (
-          <>
-            <Text style={s.sectionTitle}>7. Tile Attachment (RAS 127 Method {inputs.tileMethod})</Text>
-            {outputs.tileResults.map((tr, i) => (
-              <View key={tr.zone} style={{ ...s.derivation, flexDirection: 'row', gap: 8, paddingVertical: 2 }}>
-                <Text style={{ fontWeight: 600, width: 50 }}>Zone {tr.zone}:</Text>
-                {tr.Mr_required !== undefined && <Text>Mr = {tr.Mr_required} ft-lbf | Mf = {tr.Mf_NOA} ft-lbf</Text>}
-                {tr.Fr_required !== undefined && <Text>Fr = {tr.Fr_required} lbf | F' = {tr.Fprime_NOA} lbf</Text>}
-                <Text style={{ color: tr.pass ? c.green : c.red, fontWeight: 600 }}>{tr.pass ? 'PASS' : 'FAIL'}</Text>
-              </View>
-            ))}
-          </>
+        {/* Permit-ready text block */}
+        <View style={{ marginTop: 12, padding: 8, border: `1pt solid ${c.border}`, borderRadius: 3 }}>
+          <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8, marginBottom: 4 }}>Fastener Spacing for Base Sheet Attachment:</Text>
+          {outputs.fastenerResults.map(r => {
+            const basis = r.noaCheck.basis === 'prescriptive' ? '(NOA)' : '(RAS 117)';
+            return (
+              <Text key={r.zone} style={{ fontFamily: 'Courier', fontSize: 8, lineHeight: 1.5 }}>
+                Zone {r.zone}: {r.FS_used_in}" o.c. at {inputs.lapWidth_in}" lap + {r.FS_used_in}" o.c. at {r.n_rows - 1} rows {basis}{r.halfSheetRequired ? ' [HALF SHEET]' : ''}
+              </Text>
+            );
+          })}
+        </View>
+
+        {/* Insulation */}
+        <Text style={s.sectionHeader}>INSULATION BOARD FASTENERS (RAS 117 §8)</Text>
+        <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 4, marginLeft: 8 }}>
+          Board: {inputs.boardLength_ft}' x {inputs.boardWidth_ft}' = {inputs.boardLength_ft * inputs.boardWidth_ft} ft² · Fy = {inputs.insulation_Fy_lbf || inputs.Fy_lbf} lbf
+        </Text>
+        <View style={s.tableHeader}>
+          <Text style={{ ...s.cellHeader, width: '20%' }}>Zone</Text>
+          <Text style={{ ...s.cellHeader, width: '20%' }}>P (psf)</Text>
+          <Text style={{ ...s.cellHeader, width: '20%' }}>N Req'd</Text>
+          <Text style={{ ...s.cellHeader, width: '20%' }}>N Used</Text>
+          <Text style={{ ...s.cellHeader, width: '20%' }}>Layout</Text>
+        </View>
+        {outputs.insulationResults.map((r, i) => (
+          <View key={r.zone} style={i % 2 ? s.tableRowAlt : s.tableRow}>
+            <Text style={{ ...s.cell, width: '20%', fontFamily: 'Helvetica-Bold' }}>{r.zone}</Text>
+            <Text style={{ ...s.cell, width: '20%' }}>{r.P_psf}</Text>
+            <Text style={{ ...s.cell, width: '20%' }}>{r.N_required}</Text>
+            <Text style={{ ...s.cell, width: '20%', fontFamily: 'Courier-Bold' }}>{r.N_used}</Text>
+            <Text style={{ ...s.cell, width: '20%' }}>{r.layout}</Text>
+          </View>
+        ))}
+
+        <PageFooter rasRef={rasRef} />
+      </Page>
+
+      {/* ══════════════ PAGE 7: TAS 105 (conditional) ══════════════ */}
+      {tas105Outputs && (
+        <Page size="LETTER" style={s.page}>
+          <PageHeader projectName={projectName} rightText="TAS 105 Results" now={now} />
+
+          <Text style={s.sectionHeader}>FASTENER WITHDRAWAL RESISTANCE TEST RESULTS</Text>
+          <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 6, marginLeft: 8 }}>
+            Per Testing Application Standard TAS 105 — FBC HVHZ Test Protocols (2023)
+          </Text>
+
+          <ParamRow label="Deck Type:" value={DECK_LABELS[inputs.deckType] || inputs.deckType} />
+
+          <Text style={s.sectionSub}>Statistical Analysis (TAS 105 Method)</Text>
+          <Text style={s.calcLine}>n = {tas105Outputs.n} samples</Text>
+          <Text style={s.calcLine}>Mean (X) = {tas105Outputs.mean_lbf} lbf</Text>
+          <Text style={s.calcLine}>Std Dev = {tas105Outputs.stdDev_lbf} lbf</Text>
+          <Text style={s.calcLine}>t-factor = {tas105Outputs.tFactor} ({tas105Outputs.n >= 10 ? 'n >= 10, one-sided 95% bound' : 'n < 10, conservative factor'})</Text>
+          <Text style={{ ...s.calcLine, marginTop: 4 }}>MCRF = X - (t x sigma)</Text>
+          <Text style={s.calcLine}>     = {tas105Outputs.mean_lbf} - ({tas105Outputs.tFactor} x {tas105Outputs.stdDev_lbf})</Text>
+          <Text style={s.calcLine}>     = {tas105Outputs.mean_lbf} - {(tas105Outputs.tFactor * tas105Outputs.stdDev_lbf).toFixed(2)}</Text>
+          <Text style={s.resultLine}>MCRF = {tas105Outputs.MCRF_lbf} lbf</Text>
+
+          <Text style={{ ...s.calcLine, marginTop: 6 }}>Minimum Threshold: 275 lbf [FBC HVHZ §1620 / RAS 117-20]</Text>
+          <Text style={tas105Outputs.pass ? s.passLabel : s.failLabel}>
+            RESULT: {tas105Outputs.MCRF_lbf} lbf {tas105Outputs.pass ? '>=' : '<'} 275 lbf — {tas105Outputs.pass ? 'PASS' : 'FAIL'}
+          </Text>
+          {tas105Outputs.pass && (
+            <Text style={{ ...s.calcLine, marginTop: 4 }}>Design Fy used: {tas105Outputs.MCRF_lbf} lbf (from TAS 105 field test)</Text>
+          )}
+
+          <PageFooter rasRef={rasRef} />
+        </Page>
+      )}
+
+      {/* ══════════════ PAGE 8: WARNINGS ══════════════ */}
+      <Page size="LETTER" style={s.page}>
+        <PageHeader projectName={projectName} rightText="Notes & Assumptions" now={now} />
+
+        <Text style={s.sectionHeader}>NOTES AND ASSUMPTIONS</Text>
+        <Text style={s.calcLine}>1. All calculations based on FBC 8th Edition (2023) and ASCE 7-22 using ASD (0.6 factor).</Text>
+        <Text style={s.calcLine}>2. Design pressures for enclosed building per ASCE 7-22 §26.12. GCpi = +{outputs.GCpi}.</Text>
+        <Text style={s.calcLine}>3. Exposure {inputs.exposureCategory} per §26.7.3. HVHZ requires Exposure C per FBC §1620.</Text>
+        <Text style={s.calcLine}>4. EWA = 10 ft² per RAS 128 for membrane systems.</Text>
+        <Text style={s.calcLine}>5. Zone boundaries per Fig. 30.3-2A: width = 0.6h = {outputs.zonePressures.zoneWidth_ft.toFixed(2)} ft.</Text>
+        <Text style={s.calcLine}>6. FS rounded down to nearest 0.5". No spacing less than 6" per RAS 137 §4.</Text>
+        <Text style={s.calcLine}>7. NOA MDP {mdpAbs} psf is Zone 1' tested condition ({inputs.noa.approvalNumber || '—'}).</Text>
+        <Text style={s.calcLine}>   Enhanced attachment per {rasRef} rational analysis applied where P {'>'} MDP,</Text>
+        <Text style={s.calcLine}>   up to 300% limit per RAS 137 §6.1.3. Max factor: {maxFactor.toFixed(2)}x.</Text>
+        {tas105Outputs ? (
+          <Text style={s.calcLine}>8. Fy = {tas105Outputs.MCRF_lbf} lbf from TAS 105 field test ({tas105Outputs.pass ? 'PASS' : 'FAIL'}).</Text>
+        ) : (
+          <Text style={s.calcLine}>8. TAS 105 not required. NOA Fy = {inputs.Fy_lbf.toFixed(2)} lbf used directly.</Text>
+        )}
+        {outputs.halfSheetZones.length > 0 && (
+          <Text style={s.calcLine}>9. Half-sheet required in Zone(s) {outputs.halfSheetZones.join(', ')}.</Text>
         )}
 
-        {/* TAS 105 */}
-        {tas105Outputs && (
-          <>
-            <Text style={s.sectionTitle}>{outputs.tileResults ? '8' : '7'}. TAS 105 Field Pull Test Results</Text>
-            <View style={s.paramGrid}>
-              <View style={s.paramCard}><Text style={s.paramLabel}>n samples</Text><Text style={s.paramValue}>{tas105Outputs.n}</Text></View>
-              <View style={s.paramCard}><Text style={s.paramLabel}>Mean (X̄)</Text><Text style={s.paramValue}>{tas105Outputs.mean_lbf} lbf</Text></View>
-              <View style={s.paramCard}><Text style={s.paramLabel}>Std Dev (σ)</Text><Text style={s.paramValue}>{tas105Outputs.stdDev_lbf} lbf</Text></View>
-              <View style={s.paramCard}><Text style={s.paramLabel}>t-factor</Text><Text style={s.paramValue}>{tas105Outputs.tFactor}</Text></View>
-            </View>
-            <Text style={s.derivation}>MCRF = X̄ − t × σ = {tas105Outputs.mean_lbf} − {tas105Outputs.tFactor} × {tas105Outputs.stdDev_lbf}</Text>
-            <Text style={{ ...s.derivationResult, color: tas105Outputs.pass ? c.green : c.red }}>
-              MCRF = {tas105Outputs.MCRF_lbf} lbf — {tas105Outputs.pass ? 'PASS (≥ 275 lbf)' : 'FAIL (< 275 lbf)'}
-            </Text>
-          </>
-        )}
-
-        {/* Warnings */}
         {outputs.warnings.length > 0 && (
           <>
-            <Text style={{ ...s.sectionTitle, marginTop: 20 }}>Warnings &amp; Compliance Notes</Text>
+            <Text style={s.sectionHeader}>ACTIVE WARNINGS</Text>
             {outputs.warnings.map((w, i) => (
               <View key={i} style={s.warningBox}>
-                <Text style={{ fontSize: 8, fontWeight: 600, color: w.level === 'error' ? c.red : w.level === 'warning' ? c.amber : c.blue }}>
-                  {w.level === 'error' ? '✖' : w.level === 'warning' ? '⚠' : 'ℹ'}
+                <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: w.level === 'error' ? c.red : w.level === 'warning' ? c.amber : c.blue }}>
+                  {w.level === 'error' ? 'ERR' : w.level === 'warning' ? 'WRN' : 'INF'}
                 </Text>
                 <Text style={s.warningText}>{w.message}{w.reference ? ` [${w.reference}]` : ''}</Text>
               </View>
@@ -328,59 +516,92 @@ const FastenerCalcPdfReport = ({
           </>
         )}
 
-        {/* Pattern Summary */}
-        <Text style={{ ...s.sectionTitle, marginTop: 16 }}>Fastener Pattern Summary — Permit Ready</Text>
-        {outputs.fastenerResults.map(r => (
-          <Text key={r.zone} style={{ ...s.derivation, fontWeight: 600, color: c.navy }}>
-            Zone {r.zone}: {r.FS_used_in}" o.c. at {inputs.lapWidth_in}" lap + {r.FS_used_in}" o.c. at {r.n_rows - 1} rows{r.halfSheetRequired ? ' [HALF SHEET]' : ''}
-          </Text>
-        ))}
+        <PageFooter rasRef={rasRef} />
+      </Page>
 
-        {/* Signature Block */}
-        <View style={s.sigBlock}>
-          <Text style={{ fontSize: 10, fontWeight: 600, color: c.navy, marginBottom: 4 }}>Engineer Review &amp; Approval</Text>
-          <Text style={{ fontSize: 7, color: c.grayDark, marginBottom: 16 }}>
-            This report must be reviewed, verified, and sealed by the Engineer of Record prior to use for construction.
+      {/* ══════════════ PAGE 9: SIGNATURE ══════════════ */}
+      <Page size="LETTER" style={s.page}>
+        <PageHeader projectName={projectName} rightText="Certification" now={now} />
+
+        <Text style={s.sectionHeader}>CALCULATIONS PREPARED BY</Text>
+
+        <View style={s.sigRow}>
+          <View style={s.sigField}><View style={s.sigLine} /><Text style={s.sigLabel}>Name</Text></View>
+          <View style={s.sigField}><View style={s.sigLine} /><Text style={s.sigLabel}>Title</Text></View>
+        </View>
+        <View style={s.sigRow}>
+          <View style={s.sigField}><View style={s.sigLine} /><Text style={s.sigLabel}>FL P.E. License No.</Text></View>
+          <View style={s.sigField}><View style={s.sigLine} /><Text style={s.sigLabel}>Firm</Text></View>
+        </View>
+        <View style={s.sigRow}>
+          <View style={s.sigField}><View style={s.sigLine} /><Text style={s.sigLabel}>Date</Text></View>
+          <View style={s.sigField}><View style={s.sigLine} /><Text style={s.sigLabel}>Signature</Text></View>
+        </View>
+
+        <View style={{ ...s.sealBox, marginTop: 30 }}>
+          <Text style={{ fontSize: 8, color: c.gray }}>ENGINEER'S SEAL</Text>
+          <Text style={{ fontSize: 7, color: c.gray, marginTop: 2 }}>(Affix Here)</Text>
+        </View>
+
+        <View style={{ marginTop: 30 }}>
+          <Text style={s.sectionHeader}>REVIEWER CERTIFICATION</Text>
+          <Text style={{ fontSize: 8, color: c.slate, lineHeight: 1.6, marginLeft: 8 }}>
+            "I hereby certify that these calculations have been prepared by me or under my direct supervision, and that I am a duly licensed Professional Engineer under the laws of the State of Florida. These calculations conform to the requirements of the Florida Building Code, 8th Edition (2023) and ASCE 7-22 to the best of my knowledge and professional judgment."
           </Text>
-          <View style={s.sigRow}>
-            <View style={s.sigField}>
-              <View style={{ height: 24 }} />
-              <View style={s.sigLine} />
-              <Text style={s.sigLabel}>Engineer of Record — Signature &amp; PE Stamp</Text>
-            </View>
-            <View style={s.sigField}>
-              <View style={{ height: 24 }} />
-              <View style={s.sigLine} />
-              <Text style={s.sigLabel}>Date</Text>
-            </View>
+          <View style={{ ...s.sigRow, marginTop: 24 }}>
+            <View style={s.sigField}><View style={s.sigLine} /><Text style={s.sigLabel}>Signature</Text></View>
+            <View style={s.sigField}><View style={s.sigLine} /><Text style={s.sigLabel}>Date</Text></View>
           </View>
-          <View style={{ ...s.sigRow, marginTop: 20 }}>
-            <View style={s.sigField}>
-              <View style={{ height: 24 }} />
-              <View style={s.sigLine} />
-              <Text style={s.sigLabel}>Printed Name</Text>
-            </View>
-            <View style={s.sigField}>
-              <View style={{ height: 24 }} />
-              <View style={s.sigLine} />
-              <Text style={s.sigLabel}>License Number / State</Text>
-            </View>
+          <View style={{ ...s.sigRow, marginTop: 16 }}>
+            <View style={s.sigField}><View style={s.sigLine} /><Text style={s.sigLabel}>FL P.E. License No.</Text></View>
+            <View style={{ width: '45%' }} />
           </View>
         </View>
 
-        <Text style={s.disclaimer}>
-          FastenerCalc HVHZ provides calculations as a design aid based on FBC 8th Edition (2023), ASCE 7-22 Chapter 30 C&C,
-          and Florida Test Protocols (RAS 117, 127, 128, 137, TAS 105). All results must be reviewed and approved by a licensed
-          Professional Engineer. The Engineer of Record assumes full responsibility for the adequacy and applicability of these
-          calculations to the specific project conditions.
-        </Text>
-
-        <View style={s.footer} fixed>
-          <Text>FastenerCalc HVHZ — {rasRef}</Text>
-          <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} / ${totalPages}`} />
-        </View>
+        <PageFooter rasRef={rasRef} />
       </Page>
     </Document>
+  );
+};
+
+// ──── Zone Diagram SVG for PDF ────
+
+const ZoneDiagramSvg = ({ length, width, zoneWidth, pressures, mdp }: {
+  length: number; width: number; zoneWidth: number; pressures: any; mdp: number;
+}) => {
+  const svgW = 460;
+  const svgH = 340;
+  const pad = 50;
+  const bW = svgW - pad * 2;
+  const bH = svgH - pad * 2;
+  const scX = bW / length;
+  const scY = bH / width;
+  const zwX = Math.min(zoneWidth * scX, bW / 2);
+  const zwY = Math.min(zoneWidth * scY, bH / 2);
+
+  return (
+    <Svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`}>
+      {/* Building outline */}
+      <Rect x={pad} y={pad} width={bW} height={bH} fill="none" stroke="#2563eb" strokeWidth={1.5} />
+
+      {/* Zone 1' field */}
+      <Rect x={pad + zwX} y={pad + zwY} width={bW - 2 * zwX} height={bH - 2 * zwY} fill="#2563eb" fillOpacity={0.06} stroke="#2563eb" strokeWidth={0.5} strokeDasharray="4,2" />
+
+      {/* Zone 2 strips */}
+      <Rect x={pad + zwX} y={pad} width={bW - 2 * zwX} height={zwY} fill="#d97706" fillOpacity={0.12} />
+      <Rect x={pad + zwX} y={pad + bH - zwY} width={bW - 2 * zwX} height={zwY} fill="#d97706" fillOpacity={0.12} />
+      <Rect x={pad} y={pad + zwY} width={zwX} height={bH - 2 * zwY} fill="#d97706" fillOpacity={0.08} />
+      <Rect x={pad + bW - zwX} y={pad + zwY} width={zwX} height={bH - 2 * zwY} fill="#d97706" fillOpacity={0.08} />
+
+      {/* Zone 3 corners */}
+      <Rect x={pad} y={pad} width={zwX} height={zwY} fill="#dc2626" fillOpacity={0.12} />
+      <Rect x={pad + bW - zwX} y={pad} width={zwX} height={zwY} fill="#dc2626" fillOpacity={0.12} />
+      <Rect x={pad} y={pad + bH - zwY} width={zwX} height={zwY} fill="#dc2626" fillOpacity={0.12} />
+      <Rect x={pad + bW - zwX} y={pad + bH - zwY} width={zwX} height={zwY} fill="#dc2626" fillOpacity={0.12} />
+
+      {/* Dimension labels */}
+      <Line x1={pad} y1={svgH - 10} x2={pad + bW} y2={svgH - 10} stroke="#64748b" strokeWidth={0.5} />
+    </Svg>
   );
 };
 

@@ -1,7 +1,7 @@
 import { useFastenerStore } from '@/stores/fastener-store';
 import { AlertTriangle, AlertCircle, Info, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
-import type { FastenerOutputs } from '@/lib/fastener-engine';
+import type { FastenerOutputs, NOAZoneResult } from '@/lib/fastener-engine';
 import FastenerZoneDiagram from './FastenerZoneDiagram';
 
 const FastenerResults = () => {
@@ -10,16 +10,20 @@ const FastenerResults = () => {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Zone Diagram */}
       <FastenerZoneDiagram />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <SummaryCard label="qh (ASD)" value={`${outputs.qh_ASD.toFixed(2)}`} unit="psf" />
         <SummaryCard label="Zone 3" value={`${outputs.zonePressures.zone3.toFixed(1)}`} unit="psf" variant="destructive" />
-        <SummaryCard label="Max Extrap" value={`${outputs.maxExtrapolationFactor}×`} unit="" variant={outputs.maxExtrapolationFactor > 3 ? 'destructive' : outputs.maxExtrapolationFactor > 1 ? 'warning' : 'default'} />
+        <SummaryCard
+          label="Zone 3 Extrap"
+          value={`${outputs.maxExtrapolationFactor}×`}
+          unit="of 3.0×"
+          variant={outputs.maxExtrapolationFactor > 3 ? 'destructive' : outputs.maxExtrapolationFactor > 2 ? 'warning' : 'default'}
+        />
         <SummaryCard label="Min FS" value={`${outputs.minFS_in}`} unit="in" variant={outputs.minFS_in < 6 ? 'destructive' : 'default'} />
-        <SummaryCard label="Status" value={outputs.overallStatus === 'ok' ? '✅ OK' : outputs.overallStatus === 'warning' ? '⚠️' : '🔴 FAIL'} unit="" variant={outputs.overallStatus === 'fail' ? 'destructive' : outputs.overallStatus === 'warning' ? 'warning' : 'success'} />
+        <NOAMDPCard noa={inputs.noa} noaResults={outputs.noaResults} />
       </div>
 
       {/* Velocity Pressure Derivation */}
@@ -32,9 +36,9 @@ const FastenerResults = () => {
         </div>
       </div>
 
-      {/* Zone Pressure Table */}
+      {/* Zone Pressure Table with Attachment Basis */}
       <div className="rounded-lg border border-border bg-card p-4">
-        <h3 className="font-display text-sm font-semibold text-foreground mb-3">Zone Pressures (C&C)</h3>
+        <h3 className="font-display text-sm font-semibold text-foreground mb-3">Zone Pressures & Attachment Basis</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
@@ -42,36 +46,39 @@ const FastenerResults = () => {
                 <th className="px-3 py-2 text-left font-mono font-semibold text-muted-foreground">Zone</th>
                 <th className="px-3 py-2 text-right font-mono font-semibold text-muted-foreground">P (psf)</th>
                 <th className="px-3 py-2 text-right font-mono font-semibold text-muted-foreground">Width (ft)</th>
-                <th className="px-3 py-2 text-center font-mono font-semibold text-muted-foreground">MDP Check</th>
-                <th className="px-3 py-2 text-right font-mono font-semibold text-muted-foreground">Extrap.</th>
+                <th className="px-3 py-2 text-center font-mono font-semibold text-muted-foreground">Attachment Basis</th>
+                <th className="px-3 py-2 text-right font-mono font-semibold text-muted-foreground">Extrap Factor</th>
               </tr>
             </thead>
             <tbody>
-              {outputs.fastenerResults.map((r, i) => (
-                <tr key={r.zone} className={`border-b border-border/50 ${i % 2 ? 'bg-muted/10' : ''}`}>
-                  <td className="px-3 py-2">
-                    <span className={`inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[10px] font-bold ${
-                      r.zone === '3' ? 'bg-destructive/10 text-destructive' :
-                      r.zone === '2' ? 'bg-warning/10 text-zone-edge' :
-                      'bg-primary/10 text-primary'
-                    }`}>{r.zone === "1'" ? "1' (Field)" : `Zone ${r.zone}`}</span>
-                  </td>
-                  <td className="px-3 py-2 text-right font-mono text-uplift">{r.P_psf.toFixed(1)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-muted-foreground">{outputs.zonePressures.zoneWidth_ft}</td>
-                  <td className="px-3 py-2 text-center">
-                    <span className={`text-[10px] font-mono font-bold ${
-                      r.noaCheck === 'prescriptive' ? 'text-compression' :
-                      r.noaCheck === 'enhanced' ? 'text-zone-edge' : 'text-destructive'
-                    }`}>
-                      {r.noaCheck === 'prescriptive' ? '✅ ≤ MDP' :
-                       r.noaCheck === 'enhanced' ? '⚠️ Enhanced' : '🔴 Fail'}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-right font-mono text-muted-foreground">{r.extrapolationFactor > 1 ? `${r.extrapolationFactor}×` : '—'}</td>
-                </tr>
-              ))}
+              {outputs.fastenerResults.map((r, i) => {
+                const noa = r.noaCheck;
+                return (
+                  <tr key={r.zone} className={`border-b border-border/50 ${i % 2 ? 'bg-muted/10' : ''}`}>
+                    <td className="px-3 py-2">
+                      <span className={`inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[10px] font-bold ${
+                        r.zone === '3' ? 'bg-destructive/10 text-destructive' :
+                        r.zone === '2' ? 'bg-warning/10 text-zone-edge' :
+                        'bg-primary/10 text-primary'
+                      }`}>{r.zone === "1'" ? "1' (Field)" : `Zone ${r.zone}`}</span>
+                    </td>
+                    <td className="px-3 py-2 text-right font-mono text-uplift">{r.P_psf.toFixed(1)}</td>
+                    <td className="px-3 py-2 text-right font-mono text-muted-foreground">{outputs.zonePressures.zoneWidth_ft}</td>
+                    <td className="px-3 py-2 text-center">
+                      <AttachmentBasisBadge basis={noa.basis} />
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <ExtrapFactorBar factor={noa.extrapFactor} />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
+        </div>
+        <div className="mt-3 space-y-1 text-[10px] text-muted-foreground">
+          <p>📋 <span className="text-blue-400">NOA Prescriptive</span> — Zone pressure within NOA MDP. Use published pattern.</p>
+          <p>🔩 <span className="text-amber-400">RAS 117 Rational</span> — Enhanced spacing calculated per RAS 117-20 §10.4.5.</p>
         </div>
       </div>
 
@@ -79,7 +86,9 @@ const FastenerResults = () => {
       <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="border-b border-border bg-card p-3 flex items-center justify-between">
           <h3 className="font-display text-sm font-semibold text-foreground">Fastener Pattern Results — RAS {inputs.systemType === 'single_ply' ? '137' : '117'}</h3>
-          <span className="text-xs text-muted-foreground font-mono">Fy = {inputs.Fy_lbf} lbf</span>
+          <span className="text-xs text-muted-foreground font-mono">
+            Fy = {inputs.Fy_lbf} lbf ({inputs.fySource === 'tas105' ? 'TAS 105' : 'NOA'})
+          </span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
@@ -87,6 +96,7 @@ const FastenerResults = () => {
               <tr className="border-b border-border bg-muted/30">
                 <th className="px-3 py-2 text-left font-mono font-semibold text-muted-foreground">Zone</th>
                 <th className="px-3 py-2 text-right font-mono font-semibold text-muted-foreground">P (psf)</th>
+                <th className="px-3 py-2 text-center font-mono font-semibold text-muted-foreground">Basis</th>
                 <th className="px-3 py-2 text-right font-mono font-semibold text-muted-foreground">n Rows</th>
                 <th className="px-3 py-2 text-right font-mono font-semibold text-muted-foreground">RS (in)</th>
                 <th className="px-3 py-2 text-right font-mono font-semibold text-muted-foreground">FS Calc</th>
@@ -100,13 +110,18 @@ const FastenerResults = () => {
                 <tr key={r.zone} className={`border-b border-border/50 ${i % 2 ? 'bg-muted/10' : ''}`}>
                   <td className="px-3 py-2 font-mono font-bold text-foreground">{r.zone === "1'" ? "1'" : r.zone}</td>
                   <td className="px-3 py-2 text-right font-mono text-uplift">{r.P_psf.toFixed(1)}</td>
+                  <td className="px-3 py-2 text-center">
+                    <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                      r.noaCheck.basis === 'prescriptive' ? 'bg-blue-500/10 text-blue-400' : 'bg-amber-500/10 text-amber-400'
+                    }`}>
+                      {r.noaCheck.basis === 'prescriptive' ? 'NOA' : 'RAS 117'}
+                    </span>
+                  </td>
                   <td className="px-3 py-2 text-right font-mono">{r.n_rows}</td>
                   <td className="px-3 py-2 text-right font-mono text-muted-foreground">{r.RS_in}</td>
                   <td className="px-3 py-2 text-right font-mono text-muted-foreground">{r.FS_calculated_in}"</td>
                   <td className="px-3 py-2 text-right font-mono font-bold text-foreground">{r.FS_used_in}"</td>
-                  <td className="px-3 py-2 text-right">
-                    <DemandBar ratio={r.demandRatio} />
-                  </td>
+                  <td className="px-3 py-2 text-right"><DemandBar ratio={r.demandRatio} /></td>
                   <td className="px-3 py-2 text-center font-mono">{r.halfSheetRequired ? '⚠️' : '—'}</td>
                 </tr>
               ))}
@@ -115,7 +130,6 @@ const FastenerResults = () => {
         </div>
       </div>
 
-      {/* Pattern Summary Card */}
       <PatternSummaryCard outputs={outputs} inputs={inputs} />
 
       {/* Insulation Board Results */}
@@ -143,24 +157,21 @@ const FastenerResults = () => {
             <div><span className="text-muted-foreground block">t</span><span className="font-bold">{tas105Outputs.tFactor}</span></div>
             <div><span className="text-muted-foreground block">MCRF</span><span className={`font-bold ${tas105Outputs.pass ? 'text-compression' : 'text-destructive'}`}>{tas105Outputs.MCRF_lbf}</span></div>
           </div>
+          <div className="font-mono text-xs text-muted-foreground mt-2">
+            MCRF = {tas105Outputs.mean_lbf} − ({tas105Outputs.tFactor} × {tas105Outputs.stdDev_lbf}) = {tas105Outputs.MCRF_lbf} lbf
+          </div>
           <div className={`mt-3 text-center text-sm font-bold ${tas105Outputs.pass ? 'text-compression' : 'text-destructive'}`}>
             {tas105Outputs.pass ? '✅ PASS — MCRF ≥ 275 lbf' : '🔴 FAIL — MCRF < 275 lbf. TAS 126 moisture survey required.'}
           </div>
-        </div>
-      )}
-
-      {/* Tile Results */}
-      {outputs.tileResults && (
-        <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="font-display text-sm font-semibold text-foreground mb-3">Tile Calculation (RAS 127 Method {inputs.tileMethod})</h3>
-          {outputs.tileResults.map(tr => (
-            <div key={tr.zone} className={`flex items-center gap-3 rounded p-2 mb-1 text-xs font-mono ${tr.pass ? 'bg-success/5' : 'bg-destructive/5'}`}>
-              <span className="font-bold">Zone {tr.zone}:</span>
-              {tr.Mr_required !== undefined && <span>Mr = {tr.Mr_required} ft-lbf | Mf = {tr.Mf_NOA} ft-lbf</span>}
-              {tr.Fr_required !== undefined && <span>Fr = {tr.Fr_required} lbf | F' = {tr.Fprime_NOA} lbf</span>}
-              <span className={`ml-auto font-bold ${tr.pass ? 'text-compression' : 'text-destructive'}`}>{tr.pass ? '✅ PASS' : '🔴 FAIL'}</span>
+          {!tas105Outputs.pass && (
+            <div className="mt-3 rounded border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive space-y-1">
+              <p className="font-bold">⛔ TAS 105 FAILURE — Permit Cannot Be Issued</p>
+              <p>1. Perform moisture survey per TAS 126 on existing deck</p>
+              <p>2. Submit TAS 126 results with deck examination findings to AHJ</p>
+              <p>3. Provide deck repair/replacement specification</p>
+              <p>4. Re-test after repair; re-submit with updated TAS 105 results</p>
             </div>
-          ))}
+          )}
         </div>
       )}
 
@@ -187,7 +198,7 @@ const FastenerResults = () => {
       )}
 
       <p className="text-[10px] text-muted-foreground leading-relaxed">
-        FastenerCalc HVHZ provides calculations as a design aid based on FBC 8th Edition, ASCE 7-22, and Florida Test Protocols (RAS 117, 127, 128, 137, TAS 105).
+        FastenerCalc HVHZ provides calculations as a design aid based on FBC 8th Edition, ASCE 7-22, and Florida Test Protocols (RAS 117, 128, 137, TAS 105).
         All results must be reviewed and approved by a licensed PE. Engineer of Record assumes full responsibility.
       </p>
     </div>
@@ -195,6 +206,50 @@ const FastenerResults = () => {
 };
 
 // ─── Sub-components ───
+
+const AttachmentBasisBadge = ({ basis }: { basis: string }) => {
+  switch (basis) {
+    case 'prescriptive':
+      return <span className="text-[10px] font-mono font-bold text-blue-400">📋 NOA Prescriptive</span>;
+    case 'rational_analysis':
+      return <span className="text-[10px] font-mono font-bold text-amber-400">🔩 RAS 117 Rational</span>;
+    case 'exceeds_300pct':
+      return <span className="text-[10px] font-mono font-bold text-orange-400">⚠️ Exceeds 300%</span>;
+    case 'asterisked_fail':
+      return <span className="text-[10px] font-mono font-bold text-destructive">🔴 Asterisked Fail</span>;
+    default:
+      return null;
+  }
+};
+
+const ExtrapFactorBar = ({ factor }: { factor: number }) => {
+  const pct = Math.min((factor / 3.0) * 100, 100);
+  const color = factor > 3.0 ? 'bg-destructive' : factor > 2.7 ? 'bg-orange-500' : factor > 2.0 ? 'bg-amber-500' : 'bg-muted-foreground/30';
+  const textColor = factor > 3.0 ? 'text-destructive' : factor > 2.7 ? 'text-orange-400' : factor > 2.0 ? 'text-amber-400' : 'text-muted-foreground';
+  return (
+    <div className="flex items-center gap-1">
+      <div className="h-1.5 w-12 rounded-full bg-muted overflow-hidden">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
+      </div>
+      <span className={`font-mono text-[10px] ${textColor}`}>{factor.toFixed(2)}×</span>
+    </div>
+  );
+};
+
+const NOAMDPCard = ({ noa, noaResults }: { noa: any; noaResults: NOAZoneResult[] }) => {
+  const worstBasis = noaResults.some(r => r.blocksCalculation) ? 'destructive' :
+    noaResults.some(r => r.basis === 'rational_analysis') ? 'warning' : 'success';
+  return (
+    <div className={`rounded-lg border p-3 ${
+      worstBasis === 'destructive' ? 'border-destructive/30' :
+      worstBasis === 'warning' ? 'border-amber-500/30' : 'border-success/30'
+    }`}>
+      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">NOA MDP</span>
+      <div className="mt-1 font-mono text-lg font-bold text-foreground">{Math.abs(noa.mdp_psf)} psf</div>
+      {noa.approvalNumber && <div className="font-mono text-[10px] text-muted-foreground">{noa.approvalNumber}</div>}
+    </div>
+  );
+};
 
 const SummaryCard = ({ label, value, unit, variant = 'default' }: {
   label: string; value: string; unit: string; variant?: 'default' | 'destructive' | 'success' | 'warning';
@@ -229,9 +284,10 @@ const DemandBar = ({ ratio }: { ratio: number }) => {
 const PatternSummaryCard = ({ outputs, inputs }: { outputs: FastenerOutputs; inputs: any }) => {
   const [copied, setCopied] = useState(false);
 
-  const text = outputs.fastenerResults.map(r =>
-    `Zone ${r.zone}: ${r.FS_used_in}" o.c. at ${inputs.lapWidth_in}" lap + ${r.FS_used_in}" o.c. at ${r.n_rows - 1} rows${r.halfSheetRequired ? ' [HALF SHEET]' : ''}`
-  ).join('\n');
+  const text = outputs.fastenerResults.map(r => {
+    const basis = r.noaCheck.basis === 'prescriptive' ? '(NOA)' : '(RAS 117)';
+    return `Zone ${r.zone}: ${r.FS_used_in}" o.c. at ${inputs.lapWidth_in}" lap + ${r.FS_used_in}" o.c. at ${r.n_rows - 1} rows ${basis}${r.halfSheetRequired ? ' [HALF SHEET]' : ''}`;
+  }).join('\n');
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
@@ -242,14 +298,17 @@ const PatternSummaryCard = ({ outputs, inputs }: { outputs: FastenerOutputs; inp
   return (
     <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-display text-sm font-semibold text-foreground">
-          Fastener Pattern Summary — Permit Ready
-        </h3>
+        <h3 className="font-display text-sm font-semibold text-foreground">Fastener Pattern Summary — Permit Ready</h3>
         <button onClick={handleCopy} className="flex items-center gap-1 rounded border border-primary/30 px-2 py-1 text-[10px] text-primary hover:bg-primary/10">
           {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
+      {inputs.noa.approvalNumber && (
+        <p className="font-mono text-[10px] text-muted-foreground mb-2">
+          NOA: {inputs.noa.approvalNumber} | MDP: {Math.abs(inputs.noa.mdp_psf)} psf
+        </p>
+      )}
       <pre className="font-mono text-xs text-foreground whitespace-pre-wrap leading-relaxed">{text}</pre>
     </div>
   );

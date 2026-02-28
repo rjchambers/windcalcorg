@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCalculationStore } from '@/stores/calculation-store';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEngineerProfile } from '@/hooks/use-engineer-profile';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -15,12 +16,14 @@ import WindCalcPdfReport from './WindCalcPdfReport';
 const PdfExportButton = () => {
   const { inputs, outputs } = useCalculationStore();
   const { user, isProSubscriber } = useAuth();
+  const { profile } = useEngineerProfile();
   const navigate = useNavigate();
   const [projectName, setProjectName] = useState('');
-  const [preparedBy, setPreparedBy] = useState('');
   const [generating, setGenerating] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const preparedBy = profile.display_name || '';
 
   const handleDownload = async (watermark: boolean) => {
     if (!outputs) return;
@@ -33,6 +36,7 @@ const PdfExportButton = () => {
           projectName={projectName || 'Untitled Project'}
           preparedBy={preparedBy}
           watermark={watermark}
+          engineer={profile}
         />
       ).toBlob();
       const url = URL.createObjectURL(blob);
@@ -89,10 +93,13 @@ const PdfExportButton = () => {
             <Label className="text-xs">Project Name</Label>
             <Input placeholder="e.g. 123 Main St Residence" value={projectName} onChange={(e) => setProjectName(e.target.value)} className="font-mono text-sm" />
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Prepared By</Label>
-            <Input placeholder="e.g. Jane Smith, PE" value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} className="font-mono text-sm" />
-          </div>
+
+          {preparedBy && (
+            <p className="text-xs text-muted-foreground">
+              Report branded as: <span className="font-medium text-foreground">{profile.business_name || profile.company || preparedBy}</span>
+              {profile.pe_license && <> · {profile.license_state} {profile.license_type} #{profile.pe_license}</>}
+            </p>
+          )}
 
           {isProSubscriber ? (
             <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-3">
@@ -116,7 +123,7 @@ const PdfExportButton = () => {
                   <span className="text-sm font-bold text-primary">$10.00</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground">
-                  Full derivation chain, zone pressures, span results, and signature block — no watermarks.
+                  Branded with your firm info. Full derivation chain, zone pressures, span results, and signature block.
                 </p>
                 <Button onClick={handlePurchase} disabled={purchasing} className="w-full">
                   {purchasing ? (

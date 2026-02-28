@@ -1,8 +1,10 @@
-import { Wind, Calculator, FileText, Shield, Zap, BarChart3, ArrowRight, Check, ChevronDown, Wrench, TestTube } from 'lucide-react';
+import { Wind, Calculator, FileText, Shield, Zap, BarChart3, ArrowRight, Check, ChevronDown, Wrench, TestTube, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import BuildingDiagram from '@/components/landing/BuildingDiagram';
+import { useAuth } from '@/contexts/AuthContext';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -22,27 +24,51 @@ const LandingPage = () => {
   );
 };
 
-const Navbar = ({ onCalc, onFastener }: { onCalc: () => void; onFastener: () => void }) => (
-  <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
-    <div className="container mx-auto flex h-16 items-center justify-between px-6">
-      <div className="flex items-center gap-2">
-        <Wind className="h-6 w-6 text-primary" />
-        <span className="font-display text-lg font-bold text-foreground">WindCalc Pro</span>
+const Navbar = ({ onCalc, onFastener }: { onCalc: () => void; onFastener: () => void }) => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
+      <div className="container mx-auto flex h-16 items-center justify-between px-6">
+        <div className="flex items-center gap-2">
+          <Wind className="h-6 w-6 text-primary" />
+          <span className="font-display text-lg font-bold text-foreground">WindCalc Pro</span>
+        </div>
+        <div className="hidden items-center gap-8 md:flex">
+          <a href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a>
+          <a href="#fastener" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FastenerCalc</a>
+          <a href="#pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
+          <a href="#faq" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FAQ</a>
+        </div>
+        <div className="flex items-center gap-3">
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline max-w-[120px] truncate">{user.email}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="mr-2 h-4 w-4" /> Profile Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { signOut(); }}>
+                  <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => navigate('/login')}>Log in</Button>
+          )}
+          <Button variant="outline" size="sm" onClick={onFastener}>FastenerCalc</Button>
+          <Button size="sm" onClick={onCalc}>Wind Uplift</Button>
+        </div>
       </div>
-      <div className="hidden items-center gap-8 md:flex">
-        <a href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a>
-        <a href="#fastener" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FastenerCalc</a>
-        <a href="#pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
-        <a href="#faq" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FAQ</a>
-      </div>
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" className="text-muted-foreground">Log in</Button>
-        <Button variant="outline" size="sm" onClick={onFastener}>FastenerCalc</Button>
-        <Button size="sm" onClick={onCalc}>Wind Uplift</Button>
-      </div>
-    </div>
-  </nav>
-);
+    </nav>
+  );
+};
 
 const Hero = ({ onStart, onFastener }: { onStart: () => void; onFastener: () => void }) => (
   <section className="relative overflow-hidden pt-16">

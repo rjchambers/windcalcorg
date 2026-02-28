@@ -1,4 +1,4 @@
-// WindCalc Pro — ASCE 7-22 Chapter 28 Calculation Engine
+// HVHZ Calc Pro — ASCE 7-22 Chapter 28 Calculation Engine
 // Pure TypeScript, no dependencies
 
 export interface CalculationInputs {

@@ -183,7 +183,7 @@ const ResultsPanel = ({ outputs }: { outputs: CalculationOutputs }) => {
 
       {/* Disclaimer */}
       <p className="text-[10px] text-muted-foreground leading-relaxed">
-        WindCalc Pro provides calculations as a design aid based on ASCE 7-22 Chapter 28 Envelope Procedure.
+        HVHZ Calc Pro provides calculations as a design aid based on ASCE 7-22 Chapter 28 Envelope Procedure.
         All results must be reviewed and approved by a licensed Professional Engineer. Engineer of Record assumes full responsibility.
       </p>
     </div>

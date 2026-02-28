@@ -22,7 +22,7 @@ const CalculatorPage = () => {
             <div className="h-6 w-px bg-border" />
             <div className="flex items-center gap-2">
               <Wind className="h-5 w-5 text-primary" />
-              <span className="font-display text-sm font-semibold text-foreground">WindCalc Pro</span>
+              <span className="font-display text-sm font-semibold text-foreground">HVHZ Calc Pro</span>
             </div>
           </div>
           <div className="flex items-center gap-3">

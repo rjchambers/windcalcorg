@@ -30,7 +30,7 @@ const PdfExportButton = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `WindCalc_${(projectName || 'Report').replace(/\s+/g, '_')}.pdf`;
+      a.download = `HVHZCalcPro_Wind_${(projectName || 'Report').replace(/\s+/g, '_')}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
       setOpen(false);

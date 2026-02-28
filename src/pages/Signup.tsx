@@ -55,7 +55,7 @@ const Signup = () => {
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
             <Wind className="h-7 w-7 text-primary" />
-            <span className="font-display text-xl font-bold text-foreground">WindCalc Pro</span>
+            <span className="font-display text-xl font-bold text-foreground">HVHZ Calc Pro</span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-foreground">Create an account</h1>
           <p className="mt-1 text-sm text-muted-foreground">Start running HVHZ calculations</p>

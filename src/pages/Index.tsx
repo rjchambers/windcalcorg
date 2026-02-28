@@ -33,7 +33,7 @@ const Navbar = ({ onCalc, onFastener }: { onCalc: () => void; onFastener: () => 
       <div className="container mx-auto flex h-16 items-center justify-between px-6">
         <div className="flex items-center gap-2">
           <Wind className="h-6 w-6 text-primary" />
-          <span className="font-display text-lg font-bold text-foreground">WindCalc Pro</span>
+          <span className="font-display text-lg font-bold text-foreground">HVHZ Calc Pro</span>
         </div>
         <div className="hidden items-center gap-8 md:flex">
           <a href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a>
@@ -313,7 +313,7 @@ const PricingSection = () => (
 );
 
 const faqs = [
-  { q: 'Is this PE-stamped?', a: 'WindCalc Pro provides calculations as a design aid. The Engineer of Record is responsible for reviewing and stamping all outputs.' },
+  { q: 'Is this PE-stamped?', a: 'HVHZ Calc Pro provides calculations as a design aid. The Engineer of Record is responsible for reviewing and stamping all outputs.' },
   { q: 'What code editions are supported?', a: 'ASCE 7-22, Florida Building Code 8th Edition (FBC 2023), and IBC 2021 are all supported.' },
   { q: 'Can I use this for permit submittal?', a: 'Yes. Our PDF reports include full derivation chains and are formatted for permit submittal when stamped by the EOR.' },
   { q: 'How do you handle HVHZ?', a: 'We auto-detect Miami-Dade and Broward County addresses and apply V=175/170 mph with Exposure C requirements.' },
@@ -354,10 +354,10 @@ const Footer = () => (
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
         <div className="flex items-center gap-2">
           <Wind className="h-5 w-5 text-primary" />
-          <span className="font-display font-semibold text-foreground">WindCalc Pro</span>
+          <span className="font-display font-semibold text-foreground">HVHZ Calc Pro</span>
         </div>
         <p className="text-center text-xs text-muted-foreground max-w-xl">
-          WindCalc Pro provides calculations as a design aid based on ASCE 7-22 Chapter 28. 
+          HVHZ Calc Pro provides calculations as a design aid based on ASCE 7-22 Chapter 28. 
           All results must be reviewed by a licensed PE. Engineer of Record assumes full responsibility.
         </p>
         <div className="flex gap-4 text-xs text-muted-foreground">

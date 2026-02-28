@@ -161,7 +161,7 @@ const SampleReports = () => {
           </div>
           {currentUrl && (
             <Button variant="outline" size="sm" asChild>
-              <a href={currentUrl} download={`Sample_${activeTab === 'wind' ? 'WindCalc' : 'FastenerCalc'}_Report.pdf`}>
+              <a href={currentUrl} download={`Sample_${activeTab === 'wind' ? 'HVHZCalcPro_Wind' : 'HVHZCalcPro_Fastener'}_Report.pdf`}>
                 <FileDown className="mr-1.5 h-4 w-4" />
                 Download PDF
               </a>

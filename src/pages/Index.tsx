@@ -70,7 +70,9 @@ const Navbar = ({ onCalc, onFastener }: { onCalc: () => void; onFastener: () => 
   );
 };
 
-const Hero = ({ onStart, onFastener }: { onStart: () => void; onFastener: () => void }) => (
+const Hero = ({ onStart, onFastener }: { onStart: () => void; onFastener: () => void }) => {
+  const navigate = useNavigate();
+  return (
   <section className="relative overflow-hidden pt-16">
     <div className="gradient-hero grid-blueprint">
       <div className="container mx-auto px-6 py-24 md:py-32">
@@ -98,9 +100,12 @@ const Hero = ({ onStart, onFastener }: { onStart: () => void; onFastener: () => 
                 🔩 FastenerCalc HVHZ
               </Button>
             </div>
-            <p className="mt-4 text-xs text-muted-foreground">
-              No account required · 5 free calculations/month per tool
-            </p>
+            <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+              <span>No account required · 5 free calculations/month per tool</span>
+              <button onClick={() => navigate('/sample-reports')} className="text-primary hover:underline font-medium">
+                View Sample Reports →
+              </button>
+            </div>
           </div>
           <div className="hidden lg:block">
             <BuildingDiagram />
@@ -109,7 +114,8 @@ const Hero = ({ onStart, onFastener }: { onStart: () => void; onFastener: () => 
       </div>
     </div>
   </section>
-);
+  );
+};
 
 const SocialProof = () => (
   <section className="border-b border-border bg-card/50 py-8">
@@ -188,7 +194,9 @@ const Features = () => (
   </section>
 );
 
-const FastenerSection = ({ onStart }: { onStart: () => void }) => (
+const FastenerSection = ({ onStart }: { onStart: () => void }) => {
+  const navigate = useNavigate();
+  return (
   <section id="fastener" className="border-y border-border bg-card/30 py-20">
     <div className="container mx-auto px-6">
       <div className="text-center mb-12">
@@ -217,14 +225,18 @@ const FastenerSection = ({ onStart }: { onStart: () => void }) => (
           <p className="mt-2 text-sm text-muted-foreground">Matches HVHZ Uniform Application Form. One-click copy for permit submittal.</p>
         </div>
       </div>
-      <div className="mt-10 text-center">
+      <div className="mt-10 flex items-center justify-center gap-4">
         <Button size="lg" variant="outline" onClick={onStart} className="shadow-card">
           🔩 Try FastenerCalc HVHZ <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => navigate('/sample-reports?tab=fastener')} className="text-primary">
+          View Sample Report →
         </Button>
       </div>
     </div>
   </section>
-);
+  );
+};
 
 const steps = [
   { step: '01', title: 'Enter Parameters', description: 'Input wind speed, exposure, building geometry, and roof type with smart defaults.' },

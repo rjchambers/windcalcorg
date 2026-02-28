@@ -4,23 +4,12 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
 } from '@react-pdf/renderer';
 import type { FastenerInputs, FastenerOutputs, TAS105Outputs } from '@/lib/fastener-engine';
 
-Font.register({
-  family: 'IBM Plex Sans',
-  fonts: [
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/ibm-plex-sans@latest/latin-400-normal.ttf', fontWeight: 400 },
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/ibm-plex-sans@latest/latin-600-normal.ttf', fontWeight: 600 },
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/ibm-plex-sans@latest/latin-700-normal.ttf', fontWeight: 700 },
-  ],
-});
-
-Font.register({
-  family: 'JetBrains Mono',
-  src: 'https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-400-normal.ttf',
-});
+// Use built-in PDF fonts to avoid external font loading issues
+const FONT_SANS = 'Helvetica';
+const FONT_MONO = 'Courier';
 
 const c = {
   navy: '#0f1724',
@@ -38,7 +27,7 @@ const c = {
 };
 
 const s = StyleSheet.create({
-  page: { padding: 40, fontFamily: 'IBM Plex Sans', fontSize: 9, color: c.navy },
+  page: { padding: 40, fontFamily: FONT_SANS, fontSize: 9, color: c.navy },
   coverPage: { padding: 0, backgroundColor: c.navy },
   coverContent: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 60 },
   coverTitle: { fontSize: 28, fontWeight: 700, color: c.white, marginBottom: 4 },
@@ -56,14 +45,14 @@ const s = StyleSheet.create({
   tableHeader: { flexDirection: 'row', backgroundColor: '#e2e8f0', borderBottom: `1px solid ${c.border}`, paddingVertical: 4 },
   tableRow: { flexDirection: 'row', borderBottom: `0.5px solid #e2e8f0`, paddingVertical: 3 },
   tableRowAlt: { flexDirection: 'row', borderBottom: `0.5px solid #e2e8f0`, paddingVertical: 3, backgroundColor: '#f8fafc' },
-  cell: { paddingHorizontal: 4, fontSize: 8, fontFamily: 'JetBrains Mono' },
+  cell: { paddingHorizontal: 4, fontSize: 8, fontFamily: FONT_MONO },
   cellHeader: { paddingHorizontal: 4, fontSize: 7, fontWeight: 600, color: c.grayDark },
-  derivation: { fontFamily: 'JetBrains Mono', fontSize: 8, color: c.grayDark, lineHeight: 1.8, marginBottom: 4 },
-  derivationResult: { fontFamily: 'JetBrains Mono', fontSize: 9, fontWeight: 600, color: c.navy },
+  derivation: { fontFamily: FONT_MONO, fontSize: 8, color: c.grayDark, lineHeight: 1.8, marginBottom: 4 },
+  derivationResult: { fontFamily: FONT_MONO, fontSize: 9, fontWeight: 600, color: c.navy },
   paramGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
   paramCard: { width: '23%', borderRadius: 4, border: `0.5px solid #e2e8f0`, padding: 6 },
   paramLabel: { fontSize: 7, color: c.grayDark, marginBottom: 2 },
-  paramValue: { fontSize: 10, fontWeight: 600, color: c.navy, fontFamily: 'JetBrains Mono' },
+  paramValue: { fontSize: 10, fontWeight: 600, color: c.navy, fontFamily: FONT_MONO },
   warningBox: { flexDirection: 'row', gap: 6, padding: 6, marginBottom: 4, borderRadius: 3, border: `0.5px solid ${c.amber}`, backgroundColor: '#fffbeb' },
   warningText: { fontSize: 8, color: c.grayDark, flex: 1 },
   sigBlock: { marginTop: 40, paddingTop: 16, borderTop: `1px solid ${c.border}` },

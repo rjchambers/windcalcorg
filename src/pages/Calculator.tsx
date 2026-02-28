@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCalculationStore } from '@/stores/calculation-store';
 import CalculatorForm from '@/components/calculator/CalculatorForm';
 import ResultsPanel from '@/components/calculator/ResultsPanel';
+import PdfExportButton from '@/components/pdf/PdfExportButton';
 
 const CalculatorPage = () => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const CalculatorPage = () => {
           </div>
           <div className="flex items-center gap-2">
             <span className="hidden text-xs text-muted-foreground md:inline">ASCE 7-22 Ch. 28 Envelope Procedure</span>
+            <PdfExportButton />
           </div>
         </div>
       </header>

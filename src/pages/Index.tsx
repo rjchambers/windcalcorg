@@ -1,4 +1,4 @@
-import { Wind, Calculator, FileText, Shield, Zap, BarChart3, ArrowRight, Check, ChevronDown } from 'lucide-react';
+import { Wind, Calculator, FileText, Shield, Zap, BarChart3, ArrowRight, Check, ChevronDown, Wrench, TestTube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -9,10 +9,11 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onCalc={() => navigate('/calculator')} />
-      <Hero onStart={() => navigate('/calculator')} />
+      <Navbar onCalc={() => navigate('/calculator')} onFastener={() => navigate('/fastener')} />
+      <Hero onStart={() => navigate('/calculator')} onFastener={() => navigate('/fastener')} />
       <SocialProof />
       <Features />
+      <FastenerSection onStart={() => navigate('/fastener')} />
       <HowItWorks />
       <PricingSection />
       <FAQ />
@@ -21,7 +22,7 @@ const LandingPage = () => {
   );
 };
 
-const Navbar = ({ onCalc }: { onCalc: () => void }) => (
+const Navbar = ({ onCalc, onFastener }: { onCalc: () => void; onFastener: () => void }) => (
   <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
     <div className="container mx-auto flex h-16 items-center justify-between px-6">
       <div className="flex items-center gap-2">
@@ -30,47 +31,49 @@ const Navbar = ({ onCalc }: { onCalc: () => void }) => (
       </div>
       <div className="hidden items-center gap-8 md:flex">
         <a href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a>
+        <a href="#fastener" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FastenerCalc</a>
         <a href="#pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
         <a href="#faq" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FAQ</a>
       </div>
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" className="text-muted-foreground">Log in</Button>
-        <Button size="sm" onClick={onCalc}>Start Free</Button>
+        <Button variant="outline" size="sm" onClick={onFastener}>FastenerCalc</Button>
+        <Button size="sm" onClick={onCalc}>Wind Uplift</Button>
       </div>
     </div>
   </nav>
 );
 
-const Hero = ({ onStart }: { onStart: () => void }) => (
+const Hero = ({ onStart, onFastener }: { onStart: () => void; onFastener: () => void }) => (
   <section className="relative overflow-hidden pt-16">
     <div className="gradient-hero grid-blueprint">
       <div className="container mx-auto px-6 py-24 md:py-32">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="animate-fade-up">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-              <Shield className="h-3 w-3" /> ASCE 7-22 Compliant
+              <Shield className="h-3 w-3" /> ASCE 7-22 + FBC 8th Edition
             </div>
             <h1 className="font-display text-4xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl">
-              Wind Uplift Calculations.{' '}
+              From Truss to Tile.{' '}
               <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-                Engineered for Speed.
+                Every HVHZ Calculation.
               </span>
             </h1>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
-              Production-grade ASCE 7-22 Chapter 28 envelope procedure calculations. 
-              Auditable reports in seconds, not hours.
+              Wind uplift AND fastener patterns — the only HVHZ platform that covers both. 
+              ASCE 7-22 Chapter 28 MWFRS + Chapter 30 C&C with RAS 117/128/127/137.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Button size="lg" className="shadow-glow" onClick={onStart}>
-                Start Free Calculator
+                💨 Wind Uplift Calc
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button variant="outline" size="lg">
-                See Sample Report
+              <Button variant="outline" size="lg" onClick={onFastener}>
+                🔩 FastenerCalc HVHZ
               </Button>
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
-              No account required · 5 free calculations/month
+              No account required · 5 free calculations/month per tool
             </p>
           </div>
           <div className="hidden lg:block">
@@ -159,6 +162,44 @@ const Features = () => (
   </section>
 );
 
+const FastenerSection = ({ onStart }: { onStart: () => void }) => (
+  <section id="fastener" className="border-y border-border bg-card/30 py-20">
+    <div className="container mx-auto px-6">
+      <div className="text-center mb-12">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-warning/20 bg-warning/10 px-3 py-1 text-xs font-medium text-zone-edge">
+          🔩 NEW
+        </div>
+        <h2 className="font-display text-3xl font-bold text-foreground">Now Includes FastenerCalc HVHZ</h2>
+        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
+          HVHZ roofing calculations. From wind load to fastener pattern. Per RAS 117, 128, 127, and 137.
+        </p>
+      </div>
+      <div className="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto">
+        <div className="rounded-lg border border-border bg-card p-6 shadow-card">
+          <div className="mb-4 inline-flex rounded-md bg-primary/10 p-2.5"><Wrench className="h-5 w-5 text-primary" /></div>
+          <h3 className="font-display text-lg font-semibold text-foreground">All 6 System Types</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Modified bitumen, single-ply, adhered, tile, shingle, metal panel — with auto row escalation.</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-6 shadow-card">
+          <div className="mb-4 inline-flex rounded-md bg-primary/10 p-2.5"><TestTube className="h-5 w-5 text-primary" /></div>
+          <h3 className="font-display text-lg font-semibold text-foreground">TAS 105 Integration</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Enter field test values, get MCRF instantly with pass/fail. Auto Fy update for reroofs.</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-6 shadow-card">
+          <div className="mb-4 inline-flex rounded-md bg-primary/10 p-2.5"><FileText className="h-5 w-5 text-primary" /></div>
+          <h3 className="font-display text-lg font-semibold text-foreground">Permit-Ready Output</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Matches HVHZ Uniform Application Form. One-click copy for permit submittal.</p>
+        </div>
+      </div>
+      <div className="mt-10 text-center">
+        <Button size="lg" variant="outline" onClick={onStart} className="shadow-card">
+          🔩 Try FastenerCalc HVHZ <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  </section>
+);
+
 const steps = [
   { step: '01', title: 'Enter Parameters', description: 'Input wind speed, exposure, building geometry, and roof type with smart defaults.' },
   { step: '02', title: 'Review Results', description: 'See live zone pressures, net uplift forces, and interactive building diagrams.' },
@@ -185,9 +226,9 @@ const HowItWorks = () => (
 );
 
 const tiers = [
-  { name: 'Free', price: '$0', period: '/mo', features: ['5 calcs/month', '2 projects', 'PDF export (watermarked)', 'Clip suggestions'], cta: 'Start Free', highlight: false },
-  { name: 'Pro', price: '$29', period: '/mo', features: ['Unlimited calcs', 'Unlimited projects', 'Clean PDF export', 'DOCX & Excel', 'Comparison mode', 'Share links'], cta: 'Start Pro Trial', highlight: true },
-  { name: 'Team', price: '$89', period: '/mo', features: ['Everything in Pro', 'Up to 10 members', 'Batch calculations', 'Team templates', 'Priority support'], cta: 'Contact Sales', highlight: false },
+  { name: 'Free', price: '$0', period: '/mo', features: ['5 wind uplift calcs/mo', '3 fastener calcs/mo', 'Low-slope only', 'PDF (watermarked)'], cta: 'Start Free', highlight: false },
+  { name: 'Pro', price: '$39', period: '/mo', features: ['Unlimited calcs (both)', 'All 6 system types', 'TAS 105 module', 'Clean PDF + DOCX', 'NOA database', 'Share links'], cta: 'Start Pro Trial', highlight: true },
+  { name: 'Team', price: '$109', period: '/mo', features: ['Everything in Pro', 'Up to 10 members', 'Multi-section buildings', 'Batch calculations', 'Priority support'], cta: 'Contact Sales', highlight: false },
 ];
 
 const PricingSection = () => (

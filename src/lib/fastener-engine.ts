@@ -207,8 +207,8 @@ export function getZonePressures(inputs: FastenerInputs, qh_ASD: number): ZonePr
   };
 
   const hasZone1Prime = 
-    (inputs.buildingLength - 2 * zoneWidth > 0) &&
-    (inputs.buildingWidth - 2 * zoneWidth > 0);
+    (inputs.buildingLength - 4 * zoneWidth > 0) &&
+    (inputs.buildingWidth - 4 * zoneWidth > 0);
 
   return {
     zone1prime: hasZone1Prime ? calcP("1'") : calcP('1'),

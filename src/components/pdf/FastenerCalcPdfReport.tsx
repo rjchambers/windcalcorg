@@ -123,9 +123,12 @@ const PageFooter = ({ rasRef, firmName }: { rasRef: string; firmName?: string })
   </View>
 );
 
-const PageHeader = ({ projectName, rightText, now, firmName }: { projectName: string; rightText: string; now: string; firmName?: string }) => (
+const PageHeader = ({ projectName, rightText, now, firmName, jobAddress }: { projectName: string; rightText: string; now: string; firmName?: string; jobAddress?: string }) => (
   <View style={s.header}>
-    <Text style={s.headerTitle}>{firmName || 'HVHZ Calc Pro'} · FastenerCalc — {projectName}</Text>
+    <View>
+      <Text style={s.headerTitle}>{firmName || 'HVHZ Calc Pro'} · FastenerCalc — {projectName}</Text>
+      {jobAddress ? <Text style={{ fontSize: 7, color: c.grayDark, marginTop: 1 }}>{jobAddress}</Text> : null}
+    </View>
     <Text style={s.headerRight}>{rightText} · {now}</Text>
   </View>
 );
@@ -226,7 +229,7 @@ const FastenerCalcPdfReport = ({
 
       {/* ══════════════ PAGE 2: PROJECT CRITERIA ══════════════ */}
       <Page size="LETTER" style={s.page}>
-        <PageHeader projectName={projectName} rightText="Project Criteria" now={now} firmName={firmName} />
+        <PageHeader projectName={projectName} rightText="Project Criteria" now={now} firmName={firmName} jobAddress={jobAddress} />
 
         <Text style={s.sectionHeader}>SITE INFORMATION</Text>
         <ParamRow label="Location:" value={`${jobAddress || '—'} (${countyLabel})`} />
@@ -274,7 +277,7 @@ const FastenerCalcPdfReport = ({
 
       {/* ══════════════ PAGE 3: DESIGN PRESSURE DERIVATION ══════════════ */}
       <Page size="LETTER" style={s.page}>
-        <PageHeader projectName={projectName} rightText="Design Pressures" now={now} firmName={firmName} />
+        <PageHeader projectName={projectName} rightText="Design Pressures" now={now} firmName={firmName} jobAddress={jobAddress} />
 
         <Text style={s.sectionHeader}>DESIGN WIND PRESSURES — LOW-SLOPE ROOF</Text>
         <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 6, marginLeft: 8 }}>
@@ -318,7 +321,7 @@ const FastenerCalcPdfReport = ({
 
       {/* ══════════════ PAGE 4: ZONE DIAGRAM ══════════════ */}
       <Page size="LETTER" style={s.page}>
-        <PageHeader projectName={projectName} rightText="Zone Layout" now={now} firmName={firmName} />
+        <PageHeader projectName={projectName} rightText="Zone Layout" now={now} firmName={firmName} jobAddress={jobAddress} />
 
         <Text style={s.sectionHeader}>FIGURE 1 — ROOF ZONE LAYOUT</Text>
         <Text style={{ fontSize: 7.5, color: c.grayDark, marginBottom: 8, marginLeft: 8 }}>
@@ -338,7 +341,7 @@ const FastenerCalcPdfReport = ({
 
       {/* ══════════════ PAGE 5: RAS 117 DERIVATION ══════════════ */}
       <Page size="LETTER" style={s.page}>
-        <PageHeader projectName={projectName} rightText="Fastener Derivation" now={now} firmName={firmName} />
+        <PageHeader projectName={projectName} rightText="Fastener Derivation" now={now} firmName={firmName} jobAddress={jobAddress} />
 
         <Text style={s.sectionHeader}>BASE SHEET ATTACHMENT — FASTENER SPACING CALCULATIONS</Text>
         <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 4, marginLeft: 8 }}>
@@ -381,7 +384,7 @@ const FastenerCalcPdfReport = ({
 
       {/* ══════════════ PAGE 6: PATTERN SUMMARY ══════════════ */}
       <Page size="LETTER" style={s.page}>
-        <PageHeader projectName={projectName} rightText="Pattern Summary" now={now} firmName={firmName} />
+        <PageHeader projectName={projectName} rightText="Pattern Summary" now={now} firmName={firmName} jobAddress={jobAddress} />
 
         <Text style={s.sectionHeader}>FASTENER PATTERN SUMMARY</Text>
         <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 2, marginLeft: 8 }}>
@@ -462,7 +465,7 @@ const FastenerCalcPdfReport = ({
       {/* ══════════════ PAGE 7: TAS 105 (conditional) ══════════════ */}
       {tas105Outputs && (
         <Page size="LETTER" style={s.page}>
-          <PageHeader projectName={projectName} rightText="TAS 105 Results" now={now} firmName={firmName} />
+          <PageHeader projectName={projectName} rightText="TAS 105 Results" now={now} firmName={firmName} jobAddress={jobAddress} />
 
           <Text style={s.sectionHeader}>FASTENER WITHDRAWAL RESISTANCE TEST RESULTS</Text>
           <Text style={{ fontSize: 8, color: c.grayDark, marginBottom: 6, marginLeft: 8 }}>
@@ -495,7 +498,7 @@ const FastenerCalcPdfReport = ({
 
       {/* ══════════════ PAGE 8: WARNINGS ══════════════ */}
       <Page size="LETTER" style={s.page}>
-        <PageHeader projectName={projectName} rightText="Notes & Assumptions" now={now} firmName={firmName} />
+        <PageHeader projectName={projectName} rightText="Notes & Assumptions" now={now} firmName={firmName} jobAddress={jobAddress} />
 
         <Text style={s.sectionHeader}>NOTES AND ASSUMPTIONS</Text>
         <Text style={s.calcLine}>1. All calculations based on FBC 8th Edition (2023) and ASCE 7-22 using ASD (0.6 factor).</Text>
@@ -535,7 +538,7 @@ const FastenerCalcPdfReport = ({
 
       {/* ══════════════ PAGE 9: SIGNATURE ══════════════ */}
       <Page size="LETTER" style={s.page}>
-        <PageHeader projectName={projectName} rightText="Certification" now={now} firmName={firmName} />
+        <PageHeader projectName={projectName} rightText="Certification" now={now} firmName={firmName} jobAddress={jobAddress} />
 
         <Text style={s.sectionHeader}>CALCULATIONS PREPARED BY</Text>
 

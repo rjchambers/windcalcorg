@@ -19,6 +19,7 @@ const PdfExportButton = () => {
   const { profile } = useEngineerProfile();
   const navigate = useNavigate();
   const [projectName, setProjectName] = useState('');
+  const [jobAddress, setJobAddress] = useState('');
   const [generating, setGenerating] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
   const [open, setOpen] = useState(false);
@@ -35,6 +36,7 @@ const PdfExportButton = () => {
           outputs={outputs}
           projectName={projectName || 'Untitled Project'}
           preparedBy={preparedBy}
+          jobAddress={jobAddress}
           watermark={watermark}
           engineer={profile}
         />
@@ -91,7 +93,11 @@ const PdfExportButton = () => {
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label className="text-xs">Project Name</Label>
-            <Input placeholder="e.g. 123 Main St Residence" value={projectName} onChange={(e) => setProjectName(e.target.value)} className="font-mono text-sm" />
+            <Input placeholder="e.g. Smith Residence" value={projectName} onChange={(e) => setProjectName(e.target.value)} className="font-mono text-sm" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Site Address</Label>
+            <Input placeholder="e.g. 123 Main St, Miami, FL 33101" value={jobAddress} onChange={(e) => setJobAddress(e.target.value)} className="font-mono text-sm" />
           </div>
 
           {preparedBy && (

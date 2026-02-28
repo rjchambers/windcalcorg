@@ -1,12 +1,16 @@
 import { type CalculationOutputs } from '@/lib/calculation-engine';
 import { useCalculationStore } from '@/stores/calculation-store';
 import { AlertTriangle, AlertCircle, Info, ArrowDown, ArrowUp } from 'lucide-react';
+import InteractiveBuildingDiagram from './InteractiveBuildingDiagram';
 
 const ResultsPanel = ({ outputs }: { outputs: CalculationOutputs }) => {
   const { inputs } = useCalculationStore();
 
   return (
     <div className="space-y-6 p-6">
+      {/* Interactive Diagram */}
+      <InteractiveBuildingDiagram />
+
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <SummaryCard label="qh" value={`${outputs.qh.toFixed(2)}`} unit="psf" />

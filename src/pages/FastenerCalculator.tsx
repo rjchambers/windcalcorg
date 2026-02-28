@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFastenerStore } from '@/stores/fastener-store';
 import FastenerForm from '@/components/fastener/FastenerForm';
 import FastenerResults from '@/components/fastener/FastenerResults';
+import FastenerPdfExportButton from '@/components/pdf/FastenerPdfExportButton';
 
 const FastenerCalculatorPage = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const FastenerCalculatorPage = () => {
             <Button variant="secondary" size="sm" className="pointer-events-none">
               <Wrench className="mr-1 h-4 w-4" /> Fastener Patterns
             </Button>
+            <FastenerPdfExportButton />
             <span className="hidden text-xs text-muted-foreground md:inline">RAS 117 · 128 · 127 · 137</span>
           </div>
         </div>

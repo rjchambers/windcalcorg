@@ -9,6 +9,7 @@ import {
   Line,
 } from '@react-pdf/renderer';
 import type { FastenerInputs, FastenerOutputs, TAS105Outputs, NOAZoneResult } from '@/lib/fastener-engine';
+import WatermarkOverlay from './WatermarkOverlay';
 
 const c = {
   navy: '#0f172a',
@@ -160,6 +161,7 @@ interface Props {
   preparedBy?: string;
   jobAddress?: string;
   peNumber?: string;
+  watermark?: boolean;
 }
 
 const FastenerCalcPdfReport = ({
@@ -170,6 +172,7 @@ const FastenerCalcPdfReport = ({
   preparedBy = '',
   jobAddress = '',
   peNumber = '',
+  watermark = false,
 }: Props) => {
   const now = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const rasRef = inputs.systemType === 'single_ply' ? 'RAS 137-20' : 'RAS 117-20';
@@ -208,6 +211,7 @@ const FastenerCalcPdfReport = ({
         <Text style={{ position: 'absolute', bottom: 50, left: 54, right: 54, fontSize: 6.5, color: c.gray, lineHeight: 1.5 }}>
           DISCLAIMER: FastenerCalc HVHZ provides calculations as a design aid based on the Florida Building Code 8th Edition (2023), ASCE 7-22, and the Florida Test Protocols for High-Velocity Hurricane Zones (RAS 117, RAS 128, TAS 105). All results must be reviewed, verified, and approved by a licensed Professional Engineer or Registered Architect responsible for the project. These calculations must be signed and sealed by a qualified design professional prior to permit submission in Miami-Dade and Broward Counties. HVHZ Calc Pro LLC assumes no liability for roofing system performance, permit approval, or construction outcomes. The Engineer of Record is solely responsible for verifying the applicability of all referenced standards to specific project conditions.
         </Text>
+        {watermark && <WatermarkOverlay />}
       </Page>
 
       {/* ══════════════ PAGE 2: PROJECT CRITERIA ══════════════ */}
@@ -558,6 +562,7 @@ const FastenerCalcPdfReport = ({
           </View>
         </View>
 
+        {watermark && <WatermarkOverlay />}
         <PageFooter rasRef={rasRef} />
       </Page>
     </Document>

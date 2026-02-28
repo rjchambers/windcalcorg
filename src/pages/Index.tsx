@@ -101,7 +101,7 @@ const Hero = ({ onStart, onFastener }: { onStart: () => void; onFastener: () => 
               </Button>
             </div>
             <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
-              <span>No account required · 5 free calculations/month per tool</span>
+              <span>Free to calculate · $10 per clean PDF report</span>
               <button onClick={() => navigate('/sample-reports')} className="text-primary hover:underline font-medium">
                 View Sample Reports →
               </button>
@@ -264,9 +264,9 @@ const HowItWorks = () => (
 );
 
 const tiers = [
-  { name: 'Free', price: '$0', period: '/mo', features: ['5 wind uplift calcs/mo', '3 fastener calcs/mo', 'Low-slope only', 'PDF (watermarked)'], cta: 'Start Free', highlight: false },
-  { name: 'Pro', price: '$39', period: '/mo', features: ['Unlimited calcs (both)', 'All 6 system types', 'TAS 105 module', 'Clean PDF + DOCX', 'NOA database', 'Share links'], cta: 'Start Pro Trial', highlight: true },
-  { name: 'Team', price: '$109', period: '/mo', features: ['Everything in Pro', 'Up to 10 members', 'Multi-section buildings', 'Batch calculations', 'Priority support'], cta: 'Contact Sales', highlight: false },
+  { name: 'Calculate', price: 'Free', period: '', features: ['Unlimited wind uplift calcs', 'Unlimited fastener calcs', 'All system types', 'Interactive zone diagrams', 'Real-time results'], cta: 'Start Calculating', highlight: false },
+  { name: 'PDF Report', price: '$10', period: '/report', features: ['Clean, unwatermarked PDF', 'Full derivation chain', 'Zone pressure tables', 'Signature & seal block', 'Permit-ready format'], cta: 'Try Free Preview', highlight: true },
+  { name: 'Team (Coming Soon)', price: 'TBD', period: '', features: ['Volume discounts', 'Up to 10 members', 'Shared project library', 'Batch export', 'Priority support'], cta: 'Contact Sales', highlight: false },
 ];
 
 const PricingSection = () => (

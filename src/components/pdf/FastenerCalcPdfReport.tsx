@@ -11,15 +11,15 @@ import type { FastenerInputs, FastenerOutputs, TAS105Outputs } from '@/lib/faste
 Font.register({
   family: 'IBM Plex Sans',
   fonts: [
-    { src: 'https://fonts.gstatic.com/s/ibmplexsans/v19/zYXgKVElMYYaJe8bpLHnCwDKtdbUFI5NadY.ttf', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/ibmplexsans/v19/zYX9KVElMYYaJe8bpLHnCwDKtdbuEopCkF1ZYw.ttf', fontWeight: 600 },
-    { src: 'https://fonts.gstatic.com/s/ibmplexsans/v19/zYX9KVElMYYaJe8bpLHnCwDKtdbuBopCkF1ZYw.ttf', fontWeight: 700 },
+    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/ibm-plex-sans@latest/latin-400-normal.ttf', fontWeight: 400 },
+    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/ibm-plex-sans@latest/latin-600-normal.ttf', fontWeight: 600 },
+    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/ibm-plex-sans@latest/latin-700-normal.ttf', fontWeight: 700 },
   ],
 });
 
 Font.register({
   family: 'JetBrains Mono',
-  src: 'https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxTOlOV.ttf',
+  src: 'https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-400-normal.ttf',
 });
 
 const c = {

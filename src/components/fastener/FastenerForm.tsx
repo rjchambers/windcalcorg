@@ -171,7 +171,6 @@ const FastenerForm = () => {
                   : 'border-border bg-card hover:border-primary/30'
               }`}
             >
-              <div className="text-lg mb-1">{sys.icon}</div>
               <div className="text-xs font-semibold text-foreground">{sys.label}</div>
               <div className="text-[10px] text-muted-foreground">{sys.desc}</div>
               <div className="text-[9px] font-mono text-primary/60 mt-0.5">{sys.standard}</div>

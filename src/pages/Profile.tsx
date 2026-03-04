@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Wind, Save, ArrowLeft } from 'lucide-react';
+import { Wind, Save, ArrowLeft, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
@@ -201,6 +202,20 @@ const Profile = () => {
             <Save className="mr-2 h-4 w-4" />
             {saving ? 'Saving…' : 'Save Profile & Branding'}
           </Button>
+
+          <Separator />
+
+          <div className="rounded-lg border border-border bg-card p-6 shadow-card">
+            <h2 className="font-display text-lg font-bold text-foreground mb-1">Digital Sign & Seal</h2>
+            <p className="text-xs text-muted-foreground mb-4">
+              Manage your PE seal, signature, and signing certificate for digitally signing reports.
+            </p>
+            <Button variant="outline" className="w-full" asChild>
+              <Link to="/pe-credentials">
+                <Shield className="mr-2 h-4 w-4" /> PE Credentials & Signing
+              </Link>
+            </Button>
+          </div>
         </form>
       </div>
     </div>

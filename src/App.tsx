@@ -14,6 +14,8 @@ import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import SampleReports from "./pages/SampleReports";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Dashboard from "./pages/Dashboard";
+import PECredentials from "./pages/PECredentials";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/sample-reports" element={<SampleReports />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/pe-credentials" element={<PECredentials />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

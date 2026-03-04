@@ -85,6 +85,167 @@ export type Database = {
           },
         ]
       }
+      pe_credentials: {
+        Row: {
+          certificate_expires_at: string | null
+          certificate_fingerprint: string | null
+          certificate_generated_at: string | null
+          certificate_public_key: string | null
+          created_at: string | null
+          credentials_certified_at: string | null
+          credentials_certified_ip: string | null
+          encrypted_private_key_blob: string | null
+          encrypted_private_key_iv: string | null
+          encrypted_private_key_salt: string | null
+          engineering_discipline: string | null
+          firm_address: string | null
+          firm_email: string | null
+          firm_name: string | null
+          firm_phone: string | null
+          full_legal_name: string | null
+          id: string
+          license_status: string | null
+          license_verified: boolean | null
+          license_verified_at: string | null
+          pe_license_number: string | null
+          pe_state: string
+          seal_image_path: string | null
+          seal_uploaded_at: string | null
+          signature_image_path: string | null
+          signature_uploaded_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          certificate_expires_at?: string | null
+          certificate_fingerprint?: string | null
+          certificate_generated_at?: string | null
+          certificate_public_key?: string | null
+          created_at?: string | null
+          credentials_certified_at?: string | null
+          credentials_certified_ip?: string | null
+          encrypted_private_key_blob?: string | null
+          encrypted_private_key_iv?: string | null
+          encrypted_private_key_salt?: string | null
+          engineering_discipline?: string | null
+          firm_address?: string | null
+          firm_email?: string | null
+          firm_name?: string | null
+          firm_phone?: string | null
+          full_legal_name?: string | null
+          id?: string
+          license_status?: string | null
+          license_verified?: boolean | null
+          license_verified_at?: string | null
+          pe_license_number?: string | null
+          pe_state?: string
+          seal_image_path?: string | null
+          seal_uploaded_at?: string | null
+          signature_image_path?: string | null
+          signature_uploaded_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          certificate_expires_at?: string | null
+          certificate_fingerprint?: string | null
+          certificate_generated_at?: string | null
+          certificate_public_key?: string | null
+          created_at?: string | null
+          credentials_certified_at?: string | null
+          credentials_certified_ip?: string | null
+          encrypted_private_key_blob?: string | null
+          encrypted_private_key_iv?: string | null
+          encrypted_private_key_salt?: string | null
+          engineering_discipline?: string | null
+          firm_address?: string | null
+          firm_email?: string | null
+          firm_name?: string | null
+          firm_phone?: string | null
+          full_legal_name?: string | null
+          id?: string
+          license_status?: string | null
+          license_verified?: boolean | null
+          license_verified_at?: string | null
+          pe_license_number?: string | null
+          pe_state?: string
+          seal_image_path?: string | null
+          seal_uploaded_at?: string | null
+          signature_image_path?: string | null
+          signature_uploaded_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pe_signing_events: {
+        Row: {
+          calculation_id: string
+          calculation_type: string
+          certificate_fingerprint: string
+          document_hash: string
+          filename: string | null
+          id: string
+          pe_credentials_id: string
+          report_version: number
+          revoked: boolean | null
+          revoked_at: string | null
+          revoked_reason: string | null
+          signature_hash: string
+          signed_at: string
+          signed_document_path: string | null
+          signing_ip: string | null
+          signing_user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          calculation_id: string
+          calculation_type: string
+          certificate_fingerprint: string
+          document_hash: string
+          filename?: string | null
+          id?: string
+          pe_credentials_id: string
+          report_version?: number
+          revoked?: boolean | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          signature_hash: string
+          signed_at?: string
+          signed_document_path?: string | null
+          signing_ip?: string | null
+          signing_user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          calculation_id?: string
+          calculation_type?: string
+          certificate_fingerprint?: string
+          document_hash?: string
+          filename?: string | null
+          id?: string
+          pe_credentials_id?: string
+          report_version?: number
+          revoked?: boolean | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          signature_hash?: string
+          signed_at?: string
+          signed_document_path?: string | null
+          signing_ip?: string | null
+          signing_user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pe_signing_events_pe_credentials_id_fkey"
+            columns: ["pe_credentials_id"]
+            isOneToOne: false
+            referencedRelation: "pe_credentials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_approvals: {
         Row: {
           approval_number: string | null

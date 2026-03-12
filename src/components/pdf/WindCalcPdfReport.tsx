@@ -160,7 +160,7 @@ const WindCalcPdfReport = ({
       <Page size="LETTER" style={s.coverPage}>
         <View style={s.coverContent}>
           <Text style={{ fontSize: 10, color: c.gray, marginBottom: 8 }}>{firmName || 'HVHZ Calc Pro'}</Text>
-          <Text style={s.coverTitle}>ROOF TRUSS WIND UPLIFT CALCULATIONS</Text>
+          <Text style={s.coverTitle}>WIND UPLIFT ROOF TO WALL STRAP CALCULATIONS PER TRUSS</Text>
           <Text style={s.coverSub}>FBC 8th Edition (2023) · ASCE 7-22 Ch. 28 · MWFRS Envelope Procedure</Text>
           <View style={s.coverLine} />
           <View style={s.coverMeta}>

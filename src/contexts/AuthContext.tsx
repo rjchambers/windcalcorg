@@ -30,8 +30,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isProSubscriber, setIsProSubscriber] = useState(false);
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
 
-  // 48-hour free premium promo — expires March 6, 2026 at ~12:00 UTC
-  const FREE_PREMIUM_UNTIL = new Date('2026-03-06T12:00:00Z');
+  // 48-hour free premium promo — expires March 14, 2026 at ~12:00 UTC
+  const FREE_PREMIUM_UNTIL = new Date('2026-03-14T12:00:00Z');
 
   const checkSubscription = useCallback(async () => {
     // Grant free Pro access during promo window

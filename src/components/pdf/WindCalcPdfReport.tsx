@@ -98,7 +98,7 @@ const s = StyleSheet.create({
 
 // ──── Helpers ────
 
-const ParamRow = ({ label, value, ref: codeRef }: { label: string; value: string; ref?: string }) => (
+const ParamRow = ({ label, value, codeRef }: { label: string; value: string; codeRef?: string }) => (
   <View style={s.paramRow}>
     <Text style={s.paramLabel}>{label}</Text>
     <Text style={s.paramValue}>{value}</Text>
@@ -194,31 +194,31 @@ const WindCalcPdfReport = ({
 
         <Text style={s.sectionHeader}>SITE INFORMATION</Text>
         <ParamRow label="Project Address:" value={jobAddress || '—'} />
-        <ParamRow label="Risk Category:" value={`${inputs.riskCategory}`} ref="Table 1.5-1" />
+        <ParamRow label="Risk Category:" value={`${inputs.riskCategory}`} codeRef="Table 1.5-1" />
 
         <Text style={s.sectionHeader}>WIND PARAMETERS</Text>
-        <ParamRow label="Basic Wind Speed:" value={`V = ${inputs.V} mph`} ref="Fig. 26.5-1A" />
-        <ParamRow label="Exposure Category:" value={inputs.exposureCategory} ref="§26.7.3" />
-        <ParamRow label="Enclosure Class:" value={inputs.enclosureType} ref="§26.12" />
+        <ParamRow label="Basic Wind Speed:" value={`V = ${inputs.V} mph`} codeRef="Fig. 26.5-1A" />
+        <ParamRow label="Exposure Category:" value={inputs.exposureCategory} codeRef="§26.7.3" />
+        <ParamRow label="Enclosure Class:" value={inputs.enclosureType} codeRef="§26.12" />
         <ParamRow label="HVHZ Requirement:" value="Exposure C min per FBC §1609.1.1" />
 
         <Text style={s.sectionHeader}>BUILDING GEOMETRY</Text>
         <ParamRow label="Length (L):" value={`${inputs.buildingLength} ft`} />
         <ParamRow label="Width (W):" value={`${inputs.buildingWidth} ft`} />
-        <ParamRow label="Mean Roof Height (h):" value={`${inputs.h} ft`} ref="§26.2" />
+        <ParamRow label="Mean Roof Height (h):" value={`${inputs.h} ft`} codeRef="§26.2" />
         <ParamRow label="Roof Type:" value={inputs.roofType.charAt(0).toUpperCase() + inputs.roofType.slice(1)} />
         <ParamRow label="Roof Slope:" value={`${inputs.pitchDegrees}°`} />
-        <ParamRow label="h/L min ratio:" value={`${(inputs.h / Math.min(inputs.buildingLength, inputs.buildingWidth)).toFixed(3)}`} ref="§28.1.2" />
+        <ParamRow label="h/L min ratio:" value={`${(inputs.h / Math.min(inputs.buildingLength, inputs.buildingWidth)).toFixed(3)}`} codeRef="§28.1.2" />
 
         <Text style={s.sectionHeader}>MWFRS METHOD</Text>
-        <ParamRow label="Procedure:" value="Envelope, Low-Rise (§28.3)" ref="§28.3" />
+        <ParamRow label="Procedure:" value="Envelope, Low-Rise (§28.3)" codeRef="§28.3" />
         <ParamRow label="Applicability:" value={`h = ${inputs.h} ft ${inputs.h <= 60 ? '≤ 60 ft ✓' : '> 60 ft ⚠'}`} />
 
         <Text style={s.sectionHeader}>WIND COEFFICIENTS</Text>
-        <ParamRow label="Kz:" value={`${outputs.Kz}`} ref="Table 26.10-1" />
-        <ParamRow label="Kzt:" value={`${inputs.Kzt}`} ref="§26.8" />
-        <ParamRow label="Kd:" value={`${inputs.Kd}`} ref="Table 26.6-1" />
-        <ParamRow label="Ke:" value={`${inputs.Ke}`} ref="Table 26.9-1" />
+        <ParamRow label="Kz:" value={`${outputs.Kz}`} codeRef="Table 26.10-1" />
+        <ParamRow label="Kzt:" value={`${inputs.Kzt}`} codeRef="§26.8" />
+        <ParamRow label="Kd:" value={`${inputs.Kd}`} codeRef="Table 26.6-1" />
+        <ParamRow label="Ke:" value={`${inputs.Ke}`} codeRef="Table 26.9-1" />
 
         <Text style={s.sectionHeader}>TRUSS PARAMETERS</Text>
         <ParamRow label="Truss Spacing:" value={`${inputs.trussSpacing} ft o.c.`} />

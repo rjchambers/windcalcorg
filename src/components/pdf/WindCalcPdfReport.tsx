@@ -98,7 +98,7 @@ const s = StyleSheet.create({
 
 // ──── Helpers ────
 
-const ParamRow = ({ label, value, ref: codeRef }: { label: string; value: string; ref?: string }) => (
+const ParamRow = ({ label, value, codeRef }: { label: string; value: string; codeRef?: string }) => (
   <View style={s.paramRow}>
     <Text style={s.paramLabel}>{label}</Text>
     <Text style={s.paramValue}>{value}</Text>

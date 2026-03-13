@@ -116,7 +116,7 @@ const ParamRow = ({ label, value, ref: codeRef }: { label: string; value: string
 const PageFooter = ({ rasRef, firmName }: { rasRef: string; firmName?: string }) => (
   <View style={s.footer} fixed>
     <Text>{firmName || 'HVHZ Calc Pro'} · {rasRef} · ASCE 7-22 · FBC 8th Ed.</Text>
-    <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
+    
   </View>
 );
 

@@ -109,7 +109,7 @@ const ParamRow = ({ label, value, codeRef }: { label: string; value: string; cod
 const PageFooter = ({ firmName, projectName }: { firmName?: string; projectName?: string }) => (
   <View style={s.footer} fixed>
     <Text>{firmName || 'HVHZ Calc Pro'} · Wind Uplift — {projectName || ''} · ASCE 7-22 Ch. 28</Text>
-    <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
+    
   </View>
 );
 

@@ -36,7 +36,7 @@ const PaymentSuccess = () => {
     verify();
   }, [sessionId, user, checkSubscription, setHasReportCredit]);
 
-  const calcPath = reportType === 'wind' ? '/calculator' : '/fastener';
+  const calcPath = reportType === 'wind' ? '/calculator' : reportType === 'tile' ? '/tile' : '/fastener';
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">

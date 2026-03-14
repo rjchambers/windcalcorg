@@ -1,4 +1,4 @@
-import { Wind, Wrench, ArrowLeft } from 'lucide-react';
+import { Wind, Wrench, ArrowLeft, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useFastenerStore } from '@/stores/fastener-store';

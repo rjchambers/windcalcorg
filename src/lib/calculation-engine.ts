@@ -129,10 +129,22 @@ function interpolateGCpf(table: [number, number][], pitch: number): number {
   return table[table.length - 1][1];
 }
 
+const GCPF_FLAT: Record<string, [number, number][]> = {
+  '1':  [[0, -0.69], [5, -0.69]],
+  '1E': [[0, -1.07], [5, -1.07]],
+  '2':  [[0, -0.69], [5, -0.69]],
+  '2E': [[0, -1.07], [5, -1.07]],
+  '3':  [[0, -0.47], [5, -0.47]],
+  '3E': [[0, -0.61], [5, -0.61]],
+};
+
 export function getGCpf(roofType: string, pitch: number, zone: string): number {
-  const table = roofType === 'hip' ? GCPF_HIP : GCPF_GABLE;
+  let table: Record<string, [number, number][]>;
+  if (roofType === 'hip') table = GCPF_HIP;
+  else if (roofType === 'flat' || roofType === 'monoslope') table = GCPF_FLAT;
+  else table = GCPF_GABLE;
   const data = table[zone];
-  if (!data) return -0.69; // fallback
+  if (!data) return -0.69;
   return interpolateGCpf(data, pitch);
 }
 

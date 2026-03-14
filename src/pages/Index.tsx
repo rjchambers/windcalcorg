@@ -192,8 +192,8 @@ const FastenerSection = ({ onStart }: { onStart: () => void }) => {
       <div className="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto">
         <div className="rounded-lg border border-border bg-card p-6 shadow-card">
           <div className="mb-4 inline-flex rounded-md bg-primary/10 p-2.5"><Wrench className="h-5 w-5 text-primary" /></div>
-          <h3 className="font-display text-lg font-semibold text-foreground">Membrane, Tile & Shingle</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Modified bitumen, single-ply, adhered membrane, tile (RAS 127), and shingle (RAS 128) — with auto row escalation.</p>
+          <h3 className="font-display text-lg font-semibold text-foreground">Membrane Systems</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Modified bitumen, single-ply, and adhered membrane systems — mechanically attached per RAS 117 &amp; RAS 137.</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-6 shadow-card">
           <div className="mb-4 inline-flex rounded-md bg-primary/10 p-2.5"><TestTube className="h-5 w-5 text-primary" /></div>

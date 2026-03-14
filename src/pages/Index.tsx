@@ -38,6 +38,7 @@ const Navbar = ({ onCalc, onFastener }: { onCalc: () => void; onFastener: () => 
         <div className="hidden items-center gap-8 md:flex">
           <a href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a>
           <a href="#fastener" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FastenerCalc</a>
+          <span className="text-sm text-muted-foreground cursor-not-allowed pointer-events-none opacity-50">Tile Calc (Coming Soon)</span>
           <a href="#pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
           <a href="#faq" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FAQ</a>
         </div>
@@ -93,7 +94,7 @@ const Hero = ({ onStart, onFastener }: { onStart: () => void; onFastener: () => 
             </h1>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
               Wind uplift AND fastener patterns — the only HVHZ platform that covers both. 
-              ASCE 7-22 Chapter 28 MWFRS + Chapter 30 C&C with RAS 117/128/127/137.
+              ASCE 7-22 Chapter 28 MWFRS + Chapter 30 C&C with RAS 117 &amp; RAS 137.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Button size="lg" className="shadow-glow" onClick={onStart}>
@@ -164,7 +165,17 @@ const Features = () => (
           </div>
         ))}
       </div>
-    </div>
+      {/* Coming Soon Banner */}
+      <div className="mt-8 rounded-lg border border-warning/30 bg-warning/5 p-4 flex items-center gap-3">
+        <span className="text-warning text-lg">🏠</span>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Tile Roof Calculator (RAS 127) — Coming soon</p>
+          <p className="text-xs text-muted-foreground">Moment-based and uplift-based tile attachment for hip and gable roofs in HVHZ.</p>
+          </div>
+        ))}
+      </div>
+        </div>
+      </div>
   </section>
 );
 
@@ -181,8 +192,8 @@ const FastenerSection = ({ onStart }: { onStart: () => void }) => {
       <div className="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto">
         <div className="rounded-lg border border-border bg-card p-6 shadow-card">
           <div className="mb-4 inline-flex rounded-md bg-primary/10 p-2.5"><Wrench className="h-5 w-5 text-primary" /></div>
-          <h3 className="font-display text-lg font-semibold text-foreground">Membrane, Tile & Shingle</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Modified bitumen, single-ply, adhered membrane, tile (RAS 127), and shingle (RAS 128) — with auto row escalation.</p>
+          <h3 className="font-display text-lg font-semibold text-foreground">Membrane Systems</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Modified bitumen, single-ply, and adhered membrane systems — mechanically attached per RAS 117 &amp; RAS 137.</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-6 shadow-card">
           <div className="mb-4 inline-flex rounded-md bg-primary/10 p-2.5"><TestTube className="h-5 w-5 text-primary" /></div>
@@ -230,9 +241,10 @@ const HowItWorks = () => (
 );
 
 const tiers = [
-  { name: 'Calculate', price: 'Free', period: '', features: ['Unlimited wind uplift calcs', 'Unlimited fastener calcs', 'All system types', 'Interactive zone diagrams', 'Real-time results'], cta: 'Start Calculating', highlight: false, badge: null },
+  { name: 'Calculate', price: 'Free', period: '', features: ['Unlimited wind uplift calcs', 'Unlimited fastener calcs', 'Interactive zone diagrams', 'Real-time results'], cta: 'Start Calculating', highlight: false, badge: null },
   { name: 'Pay Per Report', price: '$10', period: '/report', features: ['Clean, unwatermarked PDF', 'Full derivation chain', 'Zone pressure tables', 'Signature & seal block', 'Permit-ready format'], cta: 'Buy Report — $10', highlight: false, badge: null },
-  { name: 'Pro', price: '$100', period: '/mo', features: ['Unlimited clean PDF exports', 'Both Wind & Fastener reports', 'No per-report fees', 'Priority support', 'Manage subscription anytime'], cta: 'Subscribe to Pro', highlight: true, badge: 'Best Value' },
+  { name: 'Pro', price: '$100', period: '/mo', features: ['Unlimited clean PDF exports', 'Wind, Fastener & Tile reports', 'No per-report fees', 'Priority support', 'Manage subscription anytime'], cta: 'Subscribe to Pro', highlight: true, badge: 'Best Value' },
+  { name: 'Firm', price: '$350', period: '/mo', features: ['Everything in Pro', '1 PE credential holder', 'Up to 5 drafter seats', 'PE review queue', 'Firm branding on all reports'], cta: 'Contact Us', highlight: false, badge: 'Teams' },
 ];
 
 const PricingSection = () => {
@@ -254,7 +266,7 @@ const PricingSection = () => {
       <div className="container mx-auto px-6">
         <h2 className="text-center font-display text-3xl font-bold text-foreground">Simple, Transparent Pricing</h2>
         <p className="mt-3 text-center text-muted-foreground">Free to calculate. Pay only when you need a clean PDF.</p>
-        <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-3">
+        <div className="mx-auto mt-12 grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-4">
           {tiers.map((t) => (
             <div key={t.name} className={`relative rounded-lg border p-6 ${t.highlight ? 'border-primary bg-card shadow-glow' : 'border-border bg-card shadow-card'}`}>
               {t.badge && <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">{t.badge}</div>}

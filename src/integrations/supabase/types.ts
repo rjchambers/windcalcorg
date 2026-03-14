@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      calculation_revisions: {
+        Row: {
+          calculation_id: string
+          calculation_type: string
+          id: string
+          inputs_json: Json
+          notes: string | null
+          results_json: Json | null
+          saved_at: string | null
+          saved_by: string | null
+          version: number
+        }
+        Insert: {
+          calculation_id: string
+          calculation_type: string
+          id?: string
+          inputs_json: Json
+          notes?: string | null
+          results_json?: Json | null
+          saved_at?: string | null
+          saved_by?: string | null
+          version: number
+        }
+        Update: {
+          calculation_id?: string
+          calculation_type?: string
+          id?: string
+          inputs_json?: Json
+          notes?: string | null
+          results_json?: Json | null
+          saved_at?: string | null
+          saved_by?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
       fastener_calculations: {
         Row: {
           construction_type: string | null
@@ -32,6 +68,7 @@ export type Database = {
           updated_at: string
           user_id: string
           version: number | null
+          version_notes: string | null
           warnings_json: Json | null
           wind_speed_mph: number | null
         }
@@ -52,6 +89,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           version?: number | null
+          version_notes?: string | null
           warnings_json?: Json | null
           wind_speed_mph?: number | null
         }
@@ -72,6 +110,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version?: number | null
+          version_notes?: string | null
           warnings_json?: Json | null
           wind_speed_mph?: number | null
         }
@@ -84,6 +123,68 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      org_members: {
+        Row: {
+          accepted_at: string | null
+          id: string
+          invited_at: string | null
+          invited_by: string | null
+          org_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          org_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          org_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          id: string
+          name: string
+          subscription_tier: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          id?: string
+          name: string
+          subscription_tier?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          name?: string
+          subscription_tier?: string | null
+        }
+        Relationships: []
       }
       pe_credentials: {
         Row: {
@@ -177,6 +278,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      pe_review_queue: {
+        Row: {
+          calculation_id: string
+          calculation_type: string
+          id: string
+          org_id: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          submitted_at: string | null
+          submitted_by: string
+        }
+        Insert: {
+          calculation_id: string
+          calculation_type: string
+          id?: string
+          org_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          submitted_by: string
+        }
+        Update: {
+          calculation_id?: string
+          calculation_type?: string
+          id?: string
+          org_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          submitted_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pe_review_queue_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pe_signing_events: {
         Row: {
@@ -498,6 +646,8 @@ export type Database = {
           results_json: Json | null
           updated_at: string
           user_id: string
+          version: number | null
+          version_notes: string | null
         }
         Insert: {
           created_at?: string
@@ -509,6 +659,8 @@ export type Database = {
           results_json?: Json | null
           updated_at?: string
           user_id: string
+          version?: number | null
+          version_notes?: string | null
         }
         Update: {
           created_at?: string
@@ -520,6 +672,8 @@ export type Database = {
           results_json?: Json | null
           updated_at?: string
           user_id?: string
+          version?: number | null
+          version_notes?: string | null
         }
         Relationships: [
           {

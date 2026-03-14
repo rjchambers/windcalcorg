@@ -236,7 +236,7 @@ const ExtrapFactorBar = ({ factor }: { factor: number }) => {
   );
 };
 
-const NOAMDPCard = ({ noa, noaResults }: { noa: any; noaResults: NOAZoneResult[] }) => {
+const NOAMDPCard = ({ noa, noaResults }: { noa: NOAParams; noaResults: NOAZoneResult[] }) => {
   const worstBasis = noaResults.some(r => r.blocksCalculation) ? 'destructive' :
     noaResults.some(r => r.basis === 'rational_analysis') ? 'warning' : 'success';
   return (

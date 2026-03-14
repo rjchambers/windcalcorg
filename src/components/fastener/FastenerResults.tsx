@@ -1,7 +1,7 @@
 import { useFastenerStore } from '@/stores/fastener-store';
 import { AlertTriangle, AlertCircle, Info, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
-import type { FastenerOutputs, NOAZoneResult } from '@/lib/fastener-engine';
+import type { FastenerOutputs, FastenerInputs, NOAParams, NOAZoneResult } from '@/lib/fastener-engine';
 import FastenerZoneDiagram from './FastenerZoneDiagram';
 
 const FastenerResults = () => {

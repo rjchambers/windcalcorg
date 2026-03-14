@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { type CalculationInputs, type CalculationOutputs, calculate } from '@/lib/calculation-engine';
 import { supabase } from '@/integrations/supabase/client';
 

@@ -36,7 +36,9 @@ const defaultInputs: CalculationInputs = {
   riskCategory: 'II',
 };
 
-export const useCalculationStore = create<CalculationStore>((set, get) => ({
+export const useCalculationStore = create<CalculationStore>()(
+  persist(
+    (set, get) => ({
   inputs: defaultInputs,
   outputs: calculate(defaultInputs),
   isDirty: false,

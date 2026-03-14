@@ -1,18 +1,90 @@
-import { Wind, ArrowLeft, Wrench, Link2 } from 'lucide-react';
+import { useState } from 'react';
+import { Wind, ArrowLeft, Wrench, Link2, Save, LayoutDashboard, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCalculationStore } from '@/stores/calculation-store';
+import { useAuth } from '@/contexts/AuthContext';
 import CalculatorForm from '@/components/calculator/CalculatorForm';
 import ResultsPanel from '@/components/calculator/ResultsPanel';
 import PdfExportButton from '@/components/pdf/PdfExportButton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
+
+const OnboardingBanner = () => {
+  const navigate = useNavigate();
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
+  return (
+    <div className="border-b border-primary/20 bg-primary/5 px-4 py-2 flex items-center justify-between text-xs">
+      <div className="flex items-center gap-2">
+        <Info className="h-4 w-4 text-primary shrink-0" />
+        <span className="text-foreground">Set up your firm profile to brand your PDF reports with your company name and PE license.</span>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => navigate('/settings?tab=business')}>Complete Profile</Button>
+        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setDismissed(true)}>Dismiss</Button>
+      </div>
+    </div>
+  );
+};
+
+const SavePopover = () => {
+  const { user } = useAuth();
+  const { saveCalculation, currentCalcId } = useCalculationStore();
+  const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleSave = async () => {
+    if (!user) { toast.error('Create a free account to save calculations.'); navigate('/signup'); return; }
+    if (!name.trim()) { toast.error('Project name is required'); return; }
+    setSaving(true);
+    const id = await saveCalculation(user.id, name, address);
+    setSaving(false);
+    if (id) { toast.success('Saved to Dashboard'); setOpen(false); }
+    else toast.error('Failed to save');
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm"><Save className="mr-1 h-4 w-4" /> Save</Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 space-y-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs">Project Name *</Label>
+          <Input placeholder="e.g. Smith Residence" value={name} onChange={e => setName(e.target.value)} className="text-sm" />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Site Address</Label>
+          <Input placeholder="123 Main St, Miami" value={address} onChange={e => setAddress(e.target.value)} className="text-sm" />
+        </div>
+        <Button onClick={handleSave} disabled={saving} className="w-full" size="sm">
+          {saving ? 'Saving…' : currentCalcId ? 'Update' : 'Save to Dashboard'}
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 const CalculatorPage = () => {
   const navigate = useNavigate();
   const { outputs } = useCalculationStore();
+  const { user } = useAuth();
+  const isMobile = useIsMobile();
+  const [mobileTab, setMobileTab] = useState('inputs');
+  const [showBanner, setShowBanner] = useState(true);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {user && showBanner && <OnboardingBanner />}
+
       <header className="border-b border-border bg-card/50 backdrop-blur-xl">
         <div className="flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-3">
@@ -25,41 +97,50 @@ const CalculatorPage = () => {
               <span className="font-display text-sm font-semibold text-foreground">HVHZ Calc Pro</span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Tab navigation */}
-            <Button variant="secondary" size="sm" className="pointer-events-none">
-              <Wind className="mr-1 h-4 w-4" /> Wind Uplift
+          <div className="flex items-center gap-2 md:gap-3">
+            {user && (
+              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="text-muted-foreground hidden md:flex">
+                <LayoutDashboard className="mr-1 h-4 w-4" /> Dashboard
+              </Button>
+            )}
+            <Button variant="secondary" size="sm" className="pointer-events-none" aria-selected="true">
+              <Wind className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">Wind Uplift</span>
             </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate('/fastener')} className="text-muted-foreground">
-              <Wrench className="mr-1 h-4 w-4" /> Fastener Patterns
+              <Wrench className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">Fastener</span>
             </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate('/strap')} className="text-muted-foreground">
-              <Link2 className="mr-1 h-4 w-4" /> Strap Calc
+              <Link2 className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">Strap</span>
             </Button>
-            <span className="hidden text-xs text-muted-foreground md:inline">ASCE 7-22 Ch. 28</span>
+            <SavePopover />
             <PdfExportButton />
           </div>
         </div>
       </header>
 
-      {/* Main content */}
-      <div className="grid lg:grid-cols-[420px_1fr]">
-        {/* Left: Form */}
-        <div className="border-r border-border bg-card/30 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 56px)' }}>
-          <CalculatorForm />
+      {isMobile ? (
+        <Tabs value={mobileTab} onValueChange={setMobileTab} className="flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
+          <TabsList className="w-full rounded-none border-b border-border">
+            <TabsTrigger value="inputs" className="flex-1">Inputs</TabsTrigger>
+            <TabsTrigger value="results" className="flex-1">Results</TabsTrigger>
+          </TabsList>
+          <TabsContent value="inputs" className="flex-1 overflow-y-auto m-0">
+            <CalculatorForm />
+          </TabsContent>
+          <TabsContent value="results" className="flex-1 overflow-y-auto m-0">
+            {outputs ? <ResultsPanel outputs={outputs} /> : <div className="flex h-full items-center justify-center text-muted-foreground">Enter parameters to see results</div>}
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <div className="grid lg:grid-cols-[420px_1fr]">
+          <div className="border-r border-border bg-card/30 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 56px)' }}>
+            <CalculatorForm />
+          </div>
+          <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 56px)' }}>
+            {outputs ? <ResultsPanel outputs={outputs} /> : <div className="flex h-full items-center justify-center text-muted-foreground">Enter parameters to see results</div>}
+          </div>
         </div>
-
-        {/* Right: Results */}
-        <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 56px)' }}>
-          {outputs ? (
-            <ResultsPanel outputs={outputs} />
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              Enter parameters to see results
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 };

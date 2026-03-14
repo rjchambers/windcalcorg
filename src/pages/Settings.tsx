@@ -403,9 +403,7 @@ const Settings = () => {
         </Tabs>
       </div>
 
-      {sigCanvasOpen && (
-        <SignatureCanvas onSave={handleDrawnSignature} onCancel={() => setSigCanvasOpen(false)} />
-      )}
+      <SignatureCanvas open={sigCanvasOpen} onClose={() => setSigCanvasOpen(false)} onAccept={handleDrawnSignature} />
     </div>
   );
 };

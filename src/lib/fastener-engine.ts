@@ -199,7 +199,8 @@ export function getZonePressures(inputs: FastenerInputs, qh_ASD: number): ZonePr
   const GCpi = inputs.enclosure === 'partially_enclosed' ? 0.55 :
     inputs.enclosure === 'enclosed' ? 0.18 : 0;
   
-  const zoneWidth = getZoneWidth(inputs.h);
+  const h_effective = inputs.h + (inputs.parapetHeight ?? 0);
+  const zoneWidth = getZoneWidth(h_effective);
 
   const calcP = (zone: string) => {
     const GCp = getGCp(zone);

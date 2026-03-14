@@ -345,7 +345,7 @@ const faqs = [
   { q: 'Is this PE-stamped?', a: 'HVHZ Calc Pro provides calculations as a design aid. The Engineer of Record is responsible for reviewing and stamping all outputs.' },
   { q: 'What code editions are supported?', a: 'ASCE 7-22, Florida Building Code 8th Edition (FBC 2023), and IBC 2021 are all supported.' },
   { q: 'Can I use this for permit submittal?', a: 'Yes. Our PDF reports include full derivation chains and are formatted for permit submittal when stamped by the EOR.' },
-  { q: 'How do you handle HVHZ?', a: 'We auto-detect Miami-Dade and Broward County addresses and apply V=175/170 mph with Exposure C requirements.' },
+  { q: 'How do you handle HVHZ?', a: 'Select your county in the calculator. Miami-Dade and Broward auto-apply the correct design wind speed (175/170 mph) and enforce Exposure Category C per FBC §1620.' },
 ];
 
 const FAQ = () => {

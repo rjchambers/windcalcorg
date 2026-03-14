@@ -32,6 +32,9 @@ const FastenerCalculatorPage = () => {
             <Button variant="secondary" size="sm" className="pointer-events-none">
               <Wrench className="mr-1 h-4 w-4" /> Fastener Patterns
             </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/strap')} className="text-muted-foreground">
+              <Link2 className="mr-1 h-4 w-4" /> Strap Calc
+            </Button>
             <FastenerPdfExportButton />
             <span className="hidden text-xs text-muted-foreground md:inline">RAS 117 · 128 · 137</span>
           </div>

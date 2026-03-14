@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Calculator from "./pages/Calculator";
 import FastenerCalculator from "./pages/FastenerCalculator";
+import StrapCalculator from "./pages/StrapCalculator";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/calculator" element={<Calculator />} />
             <Route path="/fastener" element={<FastenerCalculator />} />
+            <Route path="/strap" element={<StrapCalculator />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

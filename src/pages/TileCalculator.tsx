@@ -6,6 +6,7 @@ import { useTileStore } from '@/stores/tile-store';
 import { useAuth } from '@/contexts/AuthContext';
 import TileForm from '@/components/tile/TileForm';
 import TileResults from '@/components/tile/TileResults';
+import TilePdfExportButton from '@/components/pdf/TilePdfExportButton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 

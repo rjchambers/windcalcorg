@@ -241,9 +241,10 @@ const HowItWorks = () => (
 );
 
 const tiers = [
-  { name: 'Calculate', price: 'Free', period: '', features: ['Unlimited wind uplift calcs', 'Unlimited fastener calcs', 'All system types', 'Interactive zone diagrams', 'Real-time results'], cta: 'Start Calculating', highlight: false, badge: null },
+  { name: 'Calculate', price: 'Free', period: '', features: ['Unlimited wind uplift calcs', 'Unlimited fastener calcs', 'Interactive zone diagrams', 'Real-time results'], cta: 'Start Calculating', highlight: false, badge: null },
   { name: 'Pay Per Report', price: '$10', period: '/report', features: ['Clean, unwatermarked PDF', 'Full derivation chain', 'Zone pressure tables', 'Signature & seal block', 'Permit-ready format'], cta: 'Buy Report — $10', highlight: false, badge: null },
-  { name: 'Pro', price: '$100', period: '/mo', features: ['Unlimited clean PDF exports', 'Both Wind & Fastener reports', 'No per-report fees', 'Priority support', 'Manage subscription anytime'], cta: 'Subscribe to Pro', highlight: true, badge: 'Best Value' },
+  { name: 'Pro', price: '$100', period: '/mo', features: ['Unlimited clean PDF exports', 'Wind, Fastener & Tile reports', 'No per-report fees', 'Priority support', 'Manage subscription anytime'], cta: 'Subscribe to Pro', highlight: true, badge: 'Best Value' },
+  { name: 'Firm', price: '$350', period: '/mo', features: ['Everything in Pro', '1 PE credential holder', 'Up to 5 drafter seats', 'PE review queue', 'Firm branding on all reports'], cta: 'Contact Us', highlight: false, badge: 'Teams' },
 ];
 
 const PricingSection = () => {

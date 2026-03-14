@@ -18,7 +18,7 @@ type SigningStep = 'idle' | 'unlocking' | 'generating' | 'signing' | 'saving' | 
 interface SignAndSealModalProps {
   open: boolean;
   onClose: () => void;
-  calculationType: 'wind_uplift' | 'fastener_hvhz';
+  calculationType: 'wind_uplift' | 'fastener_hvhz' | 'tile';
   calculationId?: string;
   projectName: string;
   projectAddress?: string;

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useCalculationStore } from '@/stores/calculation-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEngineerProfile } from '@/hooks/use-engineer-profile';
-import { usePeCredentials } from '@/hooks/use-pe-credentials';
+import { usePECredentials } from '@/hooks/use-pe-credentials';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';

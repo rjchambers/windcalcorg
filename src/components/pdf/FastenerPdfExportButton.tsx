@@ -19,7 +19,8 @@ const FastenerPdfExportButton = () => {
   const { inputs, outputs, tas105Outputs } = useFastenerStore();
   const { user, isProSubscriber, hasReportCredit, setHasReportCredit } = useAuth();
   const { profile } = useEngineerProfile();
-  const { hasSeal } = usePeCredentials();
+  const { credentials } = usePECredentials();
+  const hasSeal = !!credentials?.seal_image_path;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const unlocked = searchParams.get('unlocked') === 'true';

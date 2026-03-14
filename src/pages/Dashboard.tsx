@@ -115,6 +115,15 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
+          <Card>
+            <CardContent className="flex items-center gap-4 p-6">
+              <Link2 className="h-8 w-8 text-primary" />
+              <div>
+                <p className="text-2xl font-bold">{strapCalcs.length}</p>
+                <p className="text-sm text-muted-foreground">Strap Calculations</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Projects */}

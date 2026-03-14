@@ -266,7 +266,7 @@ const PricingSection = () => {
       <div className="container mx-auto px-6">
         <h2 className="text-center font-display text-3xl font-bold text-foreground">Simple, Transparent Pricing</h2>
         <p className="mt-3 text-center text-muted-foreground">Free to calculate. Pay only when you need a clean PDF.</p>
-        <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-3">
+        <div className="mx-auto mt-12 grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-4">
           {tiers.map((t) => (
             <div key={t.name} className={`relative rounded-lg border p-6 ${t.highlight ? 'border-primary bg-card shadow-glow' : 'border-border bg-card shadow-card'}`}>
               {t.badge && <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">{t.badge}</div>}

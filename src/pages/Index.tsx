@@ -165,6 +165,15 @@ const Features = () => (
           </div>
         ))}
       </div>
+      {/* Coming Soon Banner */}
+      <div className="mt-8 rounded-lg border border-warning/30 bg-warning/5 p-4 flex items-center gap-3">
+        <span className="text-warning text-lg">🏠</span>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Tile Roof Calculator (RAS 127) — Coming soon</p>
+          <p className="text-xs text-muted-foreground">Moment-based and uplift-based tile attachment for hip and gable roofs in HVHZ.</p>
+          </div>
+        ))}
+      </div>
     </div>
   </section>
 );

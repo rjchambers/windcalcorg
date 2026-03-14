@@ -86,17 +86,17 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <nav className="border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="container mx-auto flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-4">
+        <div className="container mx-auto flex h-auto min-h-[4rem] items-center justify-between px-4 sm:px-6 py-2 gap-2">
+          <div className="flex items-center gap-3 shrink-0">
             <Button variant="ghost" size="icon" onClick={() => navigate('/')}><ArrowLeft className="h-4 w-4" /></Button>
             <Wind className="h-6 w-6 text-primary" />
-            <span className="font-display text-lg font-bold text-foreground">Dashboard</span>
+            <span className="font-display text-lg font-bold text-foreground hidden sm:inline">Dashboard</span>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm" asChild><Link to="/calculator"><Plus className="mr-1 h-3 w-3" /> Wind Calc</Link></Button>
-            <Button variant="outline" size="sm" asChild><Link to="/fastener"><Plus className="mr-1 h-3 w-3" /> Fastener Calc</Link></Button>
-            <Button variant="outline" size="sm" asChild><Link to="/tile"><Plus className="mr-1 h-3 w-3" /> Tile Calc</Link></Button>
-            <Button variant="outline" size="sm" asChild><Link to="/strap"><Plus className="mr-1 h-3 w-3" /> Strap Calc</Link></Button>
+          <div className="flex gap-1.5 sm:gap-2 flex-wrap justify-end">
+            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm"><Link to="/calculator"><Plus className="mr-1 h-3 w-3" /><span className="hidden sm:inline">Wind</span><span className="sm:hidden">W</span></Link></Button>
+            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm"><Link to="/fastener"><Plus className="mr-1 h-3 w-3" /><span className="hidden sm:inline">Fastener</span><span className="sm:hidden">F</span></Link></Button>
+            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm"><Link to="/tile"><Plus className="mr-1 h-3 w-3" /><span className="hidden sm:inline">Tile</span><span className="sm:hidden">T</span></Link></Button>
+            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm"><Link to="/strap"><Plus className="mr-1 h-3 w-3" /><span className="hidden sm:inline">Strap</span><span className="sm:hidden">S</span></Link></Button>
           </div>
         </div>
       </nav>

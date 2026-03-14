@@ -2,6 +2,7 @@ import { type CalculationOutputs } from '@/lib/calculation-engine';
 import { useCalculationStore } from '@/stores/calculation-store';
 import { AlertTriangle, AlertCircle, Info, ArrowDown, ArrowUp } from 'lucide-react';
 import InteractiveBuildingDiagram from './InteractiveBuildingDiagram';
+import ConnectorReference from './ConnectorReference';
 
 const ResultsPanel = ({ outputs }: { outputs: CalculationOutputs }) => {
   const { inputs } = useCalculationStore();

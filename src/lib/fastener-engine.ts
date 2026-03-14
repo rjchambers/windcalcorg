@@ -203,7 +203,7 @@ export function getZonePressures(inputs: FastenerInputs, qh_ASD: number): ZonePr
 
   const calcP = (zone: string) => {
     const GCp = getGCp(zone);
-    return qh_ASD * inputs.Kd * (GCp - GCpi);
+    return qh_ASD * (GCp - GCpi);
   };
 
   const hasZone1Prime = 

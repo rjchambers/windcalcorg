@@ -1,14 +1,11 @@
 import { Wind, Wrench, ArrowLeft, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { useFastenerStore } from '@/stores/fastener-store';
-import FastenerForm from '@/components/fastener/FastenerForm';
-import FastenerResults from '@/components/fastener/FastenerResults';
-import FastenerPdfExportButton from '@/components/pdf/FastenerPdfExportButton';
+import StrapForm from '@/components/strap/StrapForm';
+import StrapResults from '@/components/strap/StrapResults';
 
-const FastenerCalculatorPage = () => {
+const StrapCalculatorPage = () => {
   const navigate = useNavigate();
-  const { outputs } = useFastenerStore();
 
   return (
     <div className="min-h-screen bg-background">
@@ -20,37 +17,35 @@ const FastenerCalculatorPage = () => {
             </Button>
             <div className="h-6 w-px bg-border" />
             <div className="flex items-center gap-2">
-              <Wrench className="h-5 w-5 text-primary" />
-              <span className="font-display text-sm font-semibold text-foreground">FastenerCalc HVHZ</span>
+              <Link2 className="h-5 w-5 text-primary" />
+              <span className="font-display text-sm font-semibold text-foreground">Strap Calc HVHZ</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {/* Tab navigation */}
             <Button variant="ghost" size="sm" onClick={() => navigate('/calculator')} className="text-muted-foreground">
               <Wind className="mr-1 h-4 w-4" /> Wind Uplift
             </Button>
-            <Button variant="secondary" size="sm" className="pointer-events-none">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/fastener')} className="text-muted-foreground">
               <Wrench className="mr-1 h-4 w-4" /> Fastener Patterns
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/strap')} className="text-muted-foreground">
+            <Button variant="secondary" size="sm" className="pointer-events-none">
               <Link2 className="mr-1 h-4 w-4" /> Strap Calc
             </Button>
-            <FastenerPdfExportButton />
-            <span className="hidden text-xs text-muted-foreground md:inline">RAS 117 · 128 · 137</span>
+            <span className="hidden text-xs text-muted-foreground md:inline">FBC §R802.11</span>
           </div>
         </div>
       </header>
 
       <div className="grid lg:grid-cols-[420px_1fr]">
         <div className="border-r border-border bg-card/30 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 56px)' }}>
-          <FastenerForm />
+          <StrapForm />
         </div>
         <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 56px)' }}>
-          <FastenerResults />
+          <StrapResults />
         </div>
       </div>
     </div>
   );
 };
 
-export default FastenerCalculatorPage;
+export default StrapCalculatorPage;

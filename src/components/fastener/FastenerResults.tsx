@@ -1,7 +1,7 @@
 import { useFastenerStore } from '@/stores/fastener-store';
 import { AlertTriangle, AlertCircle, Info, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
-import type { FastenerOutputs, NOAZoneResult } from '@/lib/fastener-engine';
+import type { FastenerOutputs, FastenerInputs, NOAParams, NOAZoneResult } from '@/lib/fastener-engine';
 import FastenerZoneDiagram from './FastenerZoneDiagram';
 
 const FastenerResults = () => {
@@ -31,7 +31,7 @@ const FastenerResults = () => {
         <h3 className="font-display text-sm font-semibold text-foreground mb-3">Velocity Pressure Derivation (ASD)</h3>
         <div className="font-mono text-xs text-muted-foreground space-y-1">
           <p>Kh = {outputs.Kh} (Exp {inputs.exposureCategory}, h = {inputs.h} ft)</p>
-          <p>qh_ASD = 0.00256 × {outputs.Kh} × {inputs.Kzt} × {inputs.Ke} × {inputs.V}² × 0.6</p>
+          <p>qh_ASD = 0.00256 × {outputs.Kh} × {inputs.Kzt} × {inputs.Kd} × {inputs.Ke} × {inputs.V}² × 0.6</p>
           <p className="text-foreground font-semibold">qh_ASD = {outputs.qh_ASD.toFixed(2)} psf</p>
         </div>
       </div>
@@ -83,6 +83,14 @@ const FastenerResults = () => {
       </div>
 
       {/* Fastener Pattern Results */}
+      {outputs.fastenerResults.length === 0 && inputs.systemType === 'adhered' ? (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+          <h3 className="font-display text-sm font-semibold text-foreground mb-2">Adhered Membrane System</h3>
+          <p className="text-xs text-muted-foreground">
+            Mechanical fastener spacing does not apply. Verify NOA adhesive bond value (psf) ≥ zone pressure for all zones. See zone pressure table above.
+          </p>
+        </div>
+      ) : (
       <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="border-b border-border bg-card p-3 flex items-center justify-between">
           <h3 className="font-display text-sm font-semibold text-foreground">Fastener Pattern Results — RAS {inputs.systemType === 'single_ply' ? '137' : '117'}</h3>
@@ -114,7 +122,7 @@ const FastenerResults = () => {
                     <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
                       r.noaCheck.basis === 'prescriptive' ? 'bg-blue-500/10 text-blue-400' : 'bg-amber-500/10 text-amber-400'
                     }`}>
-                      {r.noaCheck.basis === 'prescriptive' ? 'NOA' : 'RAS 117'}
+                      {r.noaCheck.basis === 'prescriptive' ? 'NOA' : inputs.systemType === 'single_ply' ? 'RAS 137' : 'RAS 117'}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-right font-mono">{r.n_rows}</td>
@@ -129,6 +137,7 @@ const FastenerResults = () => {
           </table>
         </div>
       </div>
+      )}
 
       <PatternSummaryCard outputs={outputs} inputs={inputs} />
 
@@ -236,7 +245,7 @@ const ExtrapFactorBar = ({ factor }: { factor: number }) => {
   );
 };
 
-const NOAMDPCard = ({ noa, noaResults }: { noa: any; noaResults: NOAZoneResult[] }) => {
+const NOAMDPCard = ({ noa, noaResults }: { noa: NOAParams; noaResults: NOAZoneResult[] }) => {
   const worstBasis = noaResults.some(r => r.blocksCalculation) ? 'destructive' :
     noaResults.some(r => r.basis === 'rational_analysis') ? 'warning' : 'success';
   return (
@@ -281,7 +290,7 @@ const DemandBar = ({ ratio }: { ratio: number }) => {
   );
 };
 
-const PatternSummaryCard = ({ outputs, inputs }: { outputs: FastenerOutputs; inputs: any }) => {
+const PatternSummaryCard = ({ outputs, inputs }: { outputs: FastenerOutputs; inputs: FastenerInputs }) => {
   const [copied, setCopied] = useState(false);
 
   const text = outputs.fastenerResults.map(r => {

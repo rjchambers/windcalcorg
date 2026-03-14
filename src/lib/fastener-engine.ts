@@ -199,16 +199,17 @@ export function getZonePressures(inputs: FastenerInputs, qh_ASD: number): ZonePr
   const GCpi = inputs.enclosure === 'partially_enclosed' ? 0.55 :
     inputs.enclosure === 'enclosed' ? 0.18 : 0;
   
-  const zoneWidth = getZoneWidth(inputs.h);
+  const h_effective = inputs.h + (inputs.parapetHeight ?? 0);
+  const zoneWidth = getZoneWidth(h_effective);
 
   const calcP = (zone: string) => {
     const GCp = getGCp(zone);
-    return qh_ASD * inputs.Kd * (GCp - GCpi);
+    return qh_ASD * (GCp - GCpi);
   };
 
   const hasZone1Prime = 
-    (inputs.buildingLength - 4 * zoneWidth > 0) &&
-    (inputs.buildingWidth - 4 * zoneWidth > 0);
+    (inputs.buildingLength > 2 * zoneWidth) &&
+    (inputs.buildingWidth > 2 * zoneWidth);
 
   return {
     zone1prime: hasZone1Prime ? calcP("1'") : calcP('1'),
@@ -441,7 +442,7 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
   const warnings = validateFastenerInputs(inputs);
 
   const Kh = getKh(inputs.exposureCategory, inputs.h);
-  const qh_ASD = 0.00256 * Kh * inputs.Kzt * inputs.Ke * inputs.V * inputs.V * 0.6;
+  const qh_ASD = 0.00256 * Kh * inputs.Kzt * inputs.Kd * inputs.Ke * inputs.V * inputs.V * 0.6;
   const GCpi = inputs.enclosure === 'partially_enclosed' ? 0.55 :
     inputs.enclosure === 'enclosed' ? 0.18 : 0;
 
@@ -497,6 +498,39 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
   }
 
   // Fastener spacing per zone
+  // Adhered membrane: no fastener spacing calculation
+  if (inputs.systemType === 'adhered') {
+    warnings.push({
+      level: 'info',
+      message: 'Adhered membrane: Verify NOA listed adhesive bond strength (psf) meets or exceeds all zone pressures. No row spacing calculation applies.',
+      reference: 'TAS 124'
+    });
+
+    const boardArea = inputs.boardLength_ft * inputs.boardWidth_ft;
+    const zoneKeys = ["1'", '1', '2', '3'] as const;
+    const insulationResults: InsulationZoneResult[] = zoneKeys.map(zone =>
+      calcInsulation(zonePressureMap[zone], boardArea, inputs.insulation_Fy_lbf || inputs.Fy_lbf, zone)
+    );
+    const maxExtrap = Math.max(...noaResults.map(r => r.extrapFactor), 0);
+    const hasErrors = warnings.some(w => w.level === 'error');
+    const hasWarnings_adhered = warnings.some(w => w.level === 'warning');
+
+    return {
+      qh_ASD: Math.round(qh_ASD * 100) / 100,
+      Kh: Math.round(Kh * 1000) / 1000,
+      GCpi,
+      zonePressures,
+      fastenerResults: [],
+      insulationResults,
+      noaResults,
+      warnings,
+      maxExtrapolationFactor: Math.round(maxExtrap * 100) / 100,
+      halfSheetZones: [],
+      minFS_in: 0,
+      overallStatus: hasErrors ? 'fail' : hasWarnings_adhered ? 'warning' : 'ok',
+    };
+  }
+
   const NW = inputs.sheetWidth_in - inputs.lapWidth_in;
   const zoneKeys = ["1'", '1', '2', '3'] as const;
 

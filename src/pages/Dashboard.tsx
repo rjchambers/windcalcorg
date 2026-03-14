@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wind, ArrowLeft, FolderOpen, Calculator, Wrench, Plus, FileText, Clock } from 'lucide-react';
+import { Wind, ArrowLeft, FolderOpen, Calculator, Wrench, Plus, FileText, Clock, Link2 } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [windCalcs, setWindCalcs] = useState<CalcSummary[]>([]);
   const [fastenerCalcs, setFastenerCalcs] = useState<CalcSummary[]>([]);
+  const [strapCalcs, setStrapCalcs] = useState<CalcSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,10 +38,12 @@ const Dashboard = () => {
       supabase.from('projects').select('id, name, address, created_at, updated_at').eq('user_id', user.id).order('updated_at', { ascending: false }),
       supabase.from('wind_calculations').select('id, name, project_id, updated_at').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(50),
       supabase.from('fastener_calculations').select('id, name, project_id, updated_at').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(50),
-    ]).then(([projRes, windRes, fastRes]) => {
+      supabase.from('strap_calculations').select('id, name, project_id, updated_at').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(50),
+    ]).then(([projRes, windRes, fastRes, strapRes]) => {
       setProjects(projRes.data ?? []);
       setWindCalcs(windRes.data ?? []);
       setFastenerCalcs(fastRes.data ?? []);
+      setStrapCalcs((strapRes.data as CalcSummary[]) ?? []);
       setLoading(false);
     });
   }, [user, authLoading, navigate]);
@@ -75,13 +78,16 @@ const Dashboard = () => {
             <Button variant="outline" size="sm" asChild>
               <Link to="/fastener"><Plus className="mr-1 h-3 w-3" /> Fastener Calc</Link>
             </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/strap"><Plus className="mr-1 h-3 w-3" /> Strap Calc</Link>
+            </Button>
           </div>
         </div>
       </nav>
 
       <div className="container mx-auto px-6 py-8 space-y-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <Card>
             <CardContent className="flex items-center gap-4 p-6">
               <FolderOpen className="h-8 w-8 text-primary" />
@@ -106,6 +112,15 @@ const Dashboard = () => {
               <div>
                 <p className="text-2xl font-bold">{fastenerCalcs.length}</p>
                 <p className="text-sm text-muted-foreground">Fastener Calculations</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center gap-4 p-6">
+              <Link2 className="h-8 w-8 text-primary" />
+              <div>
+                <p className="text-2xl font-bold">{strapCalcs.length}</p>
+                <p className="text-sm text-muted-foreground">Strap Calculations</p>
               </div>
             </CardContent>
           </Card>

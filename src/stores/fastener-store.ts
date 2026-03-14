@@ -83,7 +83,7 @@ export const useFastenerStore = create<FastenerStore>((set, get) => ({
       updates.inputs = newInputs;
       updates.outputs = calculateFastener(newInputs);
     }
-    set(updates as any);
+    set(updates as Partial<FastenerStore>);
   },
   setTAS105Meta: (meta) => {
     set({ tas105Inputs: { ...get().tas105Inputs, ...meta } });

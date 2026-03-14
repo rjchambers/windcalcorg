@@ -1,4 +1,4 @@
-import { Wind, Calculator, FileText, Shield, Zap, BarChart3, ArrowRight, Check, ChevronDown, Wrench, TestTube, User, LogOut, Crown } from 'lucide-react';
+import { Wind, Calculator, FileText, Shield, Zap, BarChart3, ArrowRight, Check, ChevronDown, Wrench, TestTube, User, LogOut, Crown, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -121,7 +121,7 @@ const SocialProof = () => (
   <section className="border-b border-border bg-card/50 py-8">
     <div className="container mx-auto px-6 text-center">
       <p className="text-sm text-muted-foreground">
-        Trusted by <span className="font-semibold text-foreground">500+</span> structural engineers across Florida, Texas, and the Gulf Coast
+        Built for structural engineers and roofing contractors in Florida's High Velocity Hurricane Zone.
       </p>
       <div className="mt-4 flex flex-wrap items-center justify-center gap-8 opacity-40">
         {['Simpson Strong-Tie', 'FL Building Code', 'ASCE 7-22', 'IBC 2021'].map(name => (
@@ -154,14 +154,14 @@ const features = [
     description: 'Automatic zone assignment with interactive building diagrams. Zone 1, 2E, 3E all computed.',
   },
   {
-    icon: BarChart3,
-    title: 'Comparison Mode',
-    description: 'Compare up to 4 calculation variants side-by-side. Perfect for pitch or exposure studies.',
+    icon: Link2,
+    title: 'Roof-to-Wall Strap Calc',
+    description: 'Full connector schedule from uplift demand to Simpson/MiTek model selection. Permit-ready format with FL Product Approval numbers.',
   },
   {
     icon: Shield,
     title: 'HVHZ Detection',
-    description: 'Auto-detect Miami-Dade and Broward HVHZ requirements from project address.',
+    description: 'HVHZ mode with Miami-Dade (175 mph) and Broward (170 mph) wind speed presets and mandatory Exposure C enforcement.',
   },
 ];
 
@@ -211,8 +211,8 @@ const FastenerSection = ({ onStart }: { onStart: () => void }) => {
       <div className="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto">
         <div className="rounded-lg border border-border bg-card p-6 shadow-card">
           <div className="mb-4 inline-flex rounded-md bg-primary/10 p-2.5"><Wrench className="h-5 w-5 text-primary" /></div>
-          <h3 className="font-display text-lg font-semibold text-foreground">All 6 System Types</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Modified bitumen, single-ply, adhered, tile, shingle, metal panel — with auto row escalation.</p>
+          <h3 className="font-display text-lg font-semibold text-foreground">Membrane, Tile & Shingle</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Modified bitumen, single-ply, adhered membrane, tile (RAS 127), and shingle (RAS 128) — with auto row escalation.</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-6 shadow-card">
           <div className="mb-4 inline-flex rounded-md bg-primary/10 p-2.5"><TestTube className="h-5 w-5 text-primary" /></div>
@@ -345,7 +345,7 @@ const faqs = [
   { q: 'Is this PE-stamped?', a: 'HVHZ Calc Pro provides calculations as a design aid. The Engineer of Record is responsible for reviewing and stamping all outputs.' },
   { q: 'What code editions are supported?', a: 'ASCE 7-22, Florida Building Code 8th Edition (FBC 2023), and IBC 2021 are all supported.' },
   { q: 'Can I use this for permit submittal?', a: 'Yes. Our PDF reports include full derivation chains and are formatted for permit submittal when stamped by the EOR.' },
-  { q: 'How do you handle HVHZ?', a: 'We auto-detect Miami-Dade and Broward County addresses and apply V=175/170 mph with Exposure C requirements.' },
+  { q: 'How do you handle HVHZ?', a: 'Select your county in the calculator. Miami-Dade and Broward auto-apply the correct design wind speed (175/170 mph) and enforce Exposure Category C per FBC §1620.' },
 ];
 
 const FAQ = () => {

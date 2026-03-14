@@ -1,4 +1,4 @@
-import { Wind, ArrowLeft, Wrench } from 'lucide-react';
+import { Wind, ArrowLeft, Wrench, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useCalculationStore } from '@/stores/calculation-store';
@@ -32,6 +32,9 @@ const CalculatorPage = () => {
             </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate('/fastener')} className="text-muted-foreground">
               <Wrench className="mr-1 h-4 w-4" /> Fastener Patterns
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/strap')} className="text-muted-foreground">
+              <Link2 className="mr-1 h-4 w-4" /> Strap Calc
             </Button>
             <span className="hidden text-xs text-muted-foreground md:inline">ASCE 7-22 Ch. 28</span>
             <PdfExportButton />

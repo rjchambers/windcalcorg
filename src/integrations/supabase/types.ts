@@ -378,6 +378,47 @@ export type Database = {
         }
         Relationships: []
       }
+      strap_calculations: {
+        Row: {
+          created_at: string
+          id: string
+          inputs_json: Json
+          name: string
+          project_id: string | null
+          results_json: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inputs_json?: Json
+          name?: string
+          project_id?: string | null
+          results_json?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inputs_json?: Json
+          name?: string
+          project_id?: string | null
+          results_json?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strap_calculations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tas105_tests: {
         Row: {
           created_at: string

@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Info, Plus, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const FieldLabel = ({ label, ref_text }: { label: string; ref_text?: string }) => (
@@ -66,6 +67,22 @@ const SectionTitle = ({ title }: { title: string }) => (
 
 const CalculatorForm = () => {
   const { inputs, setInput } = useCalculationStore();
+
+  const handleSpanChange = (index: number, value: number) => {
+    const newSpans = [...inputs.spans];
+    newSpans[index] = value;
+    setInput('spans', newSpans);
+  };
+
+  const handleAddSpan = () => {
+    const lastSpan = inputs.spans[inputs.spans.length - 1] ?? 10;
+    setInput('spans', [...inputs.spans, lastSpan + 2]);
+  };
+
+  const handleRemoveSpan = (index: number) => {
+    if (inputs.spans.length <= 1) return;
+    setInput('spans', inputs.spans.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="space-y-3 p-4">
@@ -165,6 +182,32 @@ const CalculatorForm = () => {
             <SelectItem value="open">Open</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      <SectionTitle title="Spans" />
+
+      <div className="space-y-2">
+        {inputs.spans.map((span, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground font-mono w-16">Span {i + 1}:</span>
+            <div className="relative flex-1">
+              <Input
+                type="number"
+                value={span}
+                step={1}
+                onChange={(e) => handleSpanChange(i, parseFloat(e.target.value) || 0)}
+                className="font-mono text-sm pr-10"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">ft</span>
+            </div>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => handleRemoveSpan(i)} disabled={inputs.spans.length <= 1}>
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        ))}
+        <Button variant="outline" size="sm" onClick={handleAddSpan} className="w-full">
+          <Plus className="mr-1 h-3 w-3" /> Add Span
+        </Button>
       </div>
 
       <SectionTitle title="Overhang" />

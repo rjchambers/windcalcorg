@@ -129,10 +129,22 @@ function interpolateGCpf(table: [number, number][], pitch: number): number {
   return table[table.length - 1][1];
 }
 
+const GCPF_FLAT: Record<string, [number, number][]> = {
+  '1':  [[0, -0.69], [5, -0.69]],
+  '1E': [[0, -1.07], [5, -1.07]],
+  '2':  [[0, -0.69], [5, -0.69]],
+  '2E': [[0, -1.07], [5, -1.07]],
+  '3':  [[0, -0.47], [5, -0.47]],
+  '3E': [[0, -0.61], [5, -0.61]],
+};
+
 export function getGCpf(roofType: string, pitch: number, zone: string): number {
-  const table = roofType === 'hip' ? GCPF_HIP : GCPF_GABLE;
+  let table: Record<string, [number, number][]>;
+  if (roofType === 'hip') table = GCPF_HIP;
+  else if (roofType === 'flat' || roofType === 'monoslope') table = GCPF_FLAT;
+  else table = GCPF_GABLE;
   const data = table[zone];
-  if (!data) return -0.69; // fallback
+  if (!data) return -0.69;
   return interpolateGCpf(data, pitch);
 }
 
@@ -159,6 +171,12 @@ export function validateInputs(inputs: CalculationInputs): Warning[] {
   }
   if (inputs.pitchDegrees < 7 && inputs.roofType === 'hip') {
     warnings.push({ level: 'warning', message: 'Hip roof with θ < 7° is outside Ch. 28 hip range. Using gable/flat table.', reference: 'Fig. 28.3-1' });
+  }
+  if (inputs.roofType === 'monoslope' && inputs.pitchDegrees > 30) {
+    warnings.push({ level: 'error', message: 'Monoslope roof θ > 30° exceeds Ch. 28 Envelope Procedure limits. Use Directional Procedure.', reference: '§28.1.2' });
+  }
+  if (inputs.roofType === 'flat' && inputs.pitchDegrees > 5) {
+    warnings.push({ level: 'warning', message: 'Roof pitch > 5° with flat roof type selected. Verify roof type selection.', reference: 'Fig. 28.3-1' });
   }
   const ratio = Math.max(inputs.buildingLength, inputs.buildingWidth) / Math.min(inputs.buildingLength, inputs.buildingWidth);
   if (ratio > 5) {

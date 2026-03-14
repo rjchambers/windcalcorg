@@ -114,7 +114,7 @@ const FastenerResults = () => {
                     <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
                       r.noaCheck.basis === 'prescriptive' ? 'bg-blue-500/10 text-blue-400' : 'bg-amber-500/10 text-amber-400'
                     }`}>
-                      {r.noaCheck.basis === 'prescriptive' ? 'NOA' : 'RAS 117'}
+                      {r.noaCheck.basis === 'prescriptive' ? 'NOA' : inputs.systemType === 'single_ply' ? 'RAS 137' : 'RAS 117'}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-right font-mono">{r.n_rows}</td>

@@ -172,6 +172,12 @@ export function validateInputs(inputs: CalculationInputs): Warning[] {
   if (inputs.pitchDegrees < 7 && inputs.roofType === 'hip') {
     warnings.push({ level: 'warning', message: 'Hip roof with θ < 7° is outside Ch. 28 hip range. Using gable/flat table.', reference: 'Fig. 28.3-1' });
   }
+  if (inputs.roofType === 'monoslope' && inputs.pitchDegrees > 30) {
+    warnings.push({ level: 'error', message: 'Monoslope roof θ > 30° exceeds Ch. 28 Envelope Procedure limits. Use Directional Procedure.', reference: '§28.1.2' });
+  }
+  if (inputs.roofType === 'flat' && inputs.pitchDegrees > 5) {
+    warnings.push({ level: 'warning', message: 'Roof pitch > 5° with flat roof type selected. Verify roof type selection.', reference: 'Fig. 28.3-1' });
+  }
   const ratio = Math.max(inputs.buildingLength, inputs.buildingWidth) / Math.min(inputs.buildingLength, inputs.buildingWidth);
   if (ratio > 5) {
     warnings.push({ level: 'warning', message: 'Building aspect ratio > 5. Verify applicability per §28.1.2.', reference: '§28.1.2' });

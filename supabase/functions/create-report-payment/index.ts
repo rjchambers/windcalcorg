@@ -25,7 +25,7 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
 
     const { reportType } = await req.json();
-    if (!reportType || !["wind", "fastener"].includes(reportType)) {
+    if (!reportType || !["wind", "fastener", "tile"].includes(reportType)) {
       throw new Error("Invalid report type");
     }
 

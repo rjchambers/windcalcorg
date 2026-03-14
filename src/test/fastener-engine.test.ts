@@ -26,7 +26,7 @@ describe('calculateFastener — Kd in qh', () => {
       boardLength_ft: 4, boardWidth_ft: 8, insulation_Fy_lbf: 29.48,
       county: 'miami_dade', isHVHZ: true,
     });
-    // qh_ASD = 0.00256 * 0.85 * 1.0 * 0.85 * 1.0 * 175^2 * 0.6 ≈ 28.6 psf
-    expect(result.qh_ASD).toBeCloseTo(28.6, 0);
+    // qh_ASD = 0.00256 * 0.85 * 1.0 * 0.85 * 1.0 * 175^2 * 0.6 ≈ 34.0 psf
+    expect(result.qh_ASD).toBeCloseTo(34.0, 0);
   });
 });

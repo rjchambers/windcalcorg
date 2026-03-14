@@ -121,7 +121,7 @@ const SocialProof = () => (
   <section className="border-b border-border bg-card/50 py-8">
     <div className="container mx-auto px-6 text-center">
       <p className="text-sm text-muted-foreground">
-        Trusted by <span className="font-semibold text-foreground">500+</span> structural engineers across Florida, Texas, and the Gulf Coast
+        Built for structural engineers and roofing contractors in Florida's High Velocity Hurricane Zone.
       </p>
       <div className="mt-4 flex flex-wrap items-center justify-center gap-8 opacity-40">
         {['Simpson Strong-Tie', 'FL Building Code', 'ASCE 7-22', 'IBC 2021'].map(name => (

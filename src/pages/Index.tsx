@@ -1,4 +1,4 @@
-import { Wind, Calculator, FileText, Shield, Zap, BarChart3, ArrowRight, Check, ChevronDown, Wrench, TestTube, User, LogOut, Crown } from 'lucide-react';
+import { Wind, Calculator, FileText, Shield, Zap, BarChart3, ArrowRight, Check, ChevronDown, Wrench, TestTube, User, LogOut, Crown, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';

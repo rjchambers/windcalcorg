@@ -7,8 +7,10 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isProSubscriber: boolean;
+  hasReportCredit: boolean;
   subscriptionEnd: string | null;
   checkSubscription: () => Promise<void>;
+  setHasReportCredit: (v: boolean) => void;
   signOut: () => Promise<void>;
 }
 
@@ -17,8 +19,10 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   isProSubscriber: false,
+  hasReportCredit: false,
   subscriptionEnd: null,
   checkSubscription: async () => {},
+  setHasReportCredit: () => {},
   signOut: async () => {},
 });
 
@@ -28,19 +32,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isProSubscriber, setIsProSubscriber] = useState(false);
+  const [hasReportCredit, setHasReportCredit] = useState(false);
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
 
-  // 48-hour free premium promo — expires March 14, 2026 at ~12:00 UTC
-  const FREE_PREMIUM_UNTIL = new Date('2026-03-14T12:00:00Z');
-
   const checkSubscription = useCallback(async () => {
-    // Grant free Pro access during promo window
-    if (new Date() < FREE_PREMIUM_UNTIL) {
-      setIsProSubscriber(true);
-      setSubscriptionEnd(FREE_PREMIUM_UNTIL.toISOString());
-      return;
-    }
-
     try {
       const { data, error } = await supabase.functions.invoke('check-subscription');
       if (error) {
@@ -49,6 +44,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       setIsProSubscriber(data?.subscribed ?? false);
       setSubscriptionEnd(data?.subscription_end ?? null);
+      if (data?.report_credit) {
+        setHasReportCredit(true);
+      }
     } catch (err) {
       console.error('Subscription check error:', err);
     }
@@ -59,11 +57,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session);
       setLoading(false);
       if (session?.user) {
-        // Defer to avoid potential Supabase client deadlocks
         setTimeout(() => checkSubscription(), 0);
       } else {
         setIsProSubscriber(false);
         setSubscriptionEnd(null);
+        setHasReportCredit(false);
       }
     });
 
@@ -78,7 +76,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, [checkSubscription]);
 
-  // Periodic refresh every 60s while logged in
   useEffect(() => {
     if (!session?.user) return;
     const interval = setInterval(checkSubscription, 60_000);
@@ -89,6 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setIsProSubscriber(false);
     setSubscriptionEnd(null);
+    setHasReportCredit(false);
   };
 
   return (
@@ -97,8 +95,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       user: session?.user ?? null,
       loading,
       isProSubscriber,
+      hasReportCredit,
       subscriptionEnd,
       checkSubscription,
+      setHasReportCredit,
       signOut,
     }}>
       {children}

@@ -94,7 +94,7 @@ const Hero = ({ onStart, onFastener }: { onStart: () => void; onFastener: () => 
             </h1>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
               Wind uplift AND fastener patterns — the only HVHZ platform that covers both. 
-              ASCE 7-22 Chapter 28 MWFRS + Chapter 30 C&C with RAS 117/128/127/137.
+              ASCE 7-22 Chapter 28 MWFRS + Chapter 30 C&C with RAS 117 &amp; RAS 137.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Button size="lg" className="shadow-glow" onClick={onStart}>

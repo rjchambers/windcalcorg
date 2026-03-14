@@ -635,6 +635,59 @@ export type Database = {
           },
         ]
       }
+      tile_calculations: {
+        Row: {
+          created_at: string
+          id: string
+          inputs_json: Json
+          name: string
+          notes: string | null
+          project_id: string | null
+          results_json: Json | null
+          status: string | null
+          updated_at: string
+          user_id: string
+          version: number | null
+          version_notes: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inputs_json?: Json
+          name?: string
+          notes?: string | null
+          project_id?: string | null
+          results_json?: Json | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+          version?: number | null
+          version_notes?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inputs_json?: Json
+          name?: string
+          notes?: string | null
+          project_id?: string | null
+          results_json?: Json | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+          version?: number | null
+          version_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tile_calculations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wind_calculations: {
         Row: {
           created_at: string

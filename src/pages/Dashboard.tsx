@@ -78,6 +78,9 @@ const Dashboard = () => {
             <Button variant="outline" size="sm" asChild>
               <Link to="/fastener"><Plus className="mr-1 h-3 w-3" /> Fastener Calc</Link>
             </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/strap"><Plus className="mr-1 h-3 w-3" /> Strap Calc</Link>
+            </Button>
           </div>
         </div>
       </nav>

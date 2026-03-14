@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Info, Plus, X, HelpCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import SiteLookup from '@/components/shared/SiteLookup';
 
 const FieldLabel = ({ label, ref_text }: { label: string; ref_text?: string }) => (
   <div className="flex items-center gap-1.5">
@@ -92,6 +93,11 @@ const CalculatorForm = () => {
   return (
     <div className="space-y-3 p-4">
       <h2 className="font-display text-lg font-bold text-foreground">Input Parameters</h2>
+
+      <SiteLookup onApply={(vals) => {
+        setInput('V', vals.V);
+        setInput('exposureCategory', vals.exposure);
+      }} />
 
       <SectionTitle title="Wind & Site" />
 

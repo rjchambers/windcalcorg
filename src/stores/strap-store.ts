@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { type StrapInputs, type StrapOutputs, calculateStrap } from '@/lib/strap-engine';
 
 interface StrapStore {
@@ -22,12 +23,25 @@ const defaultInputs: StrapInputs = {
   county: 'miami_dade',
 };
 
-export const useStrapStore = create<StrapStore>((set, get) => ({
-  inputs: defaultInputs,
-  outputs: calculateStrap(defaultInputs),
-  setInput: (key, value) => {
-    const newInputs = { ...get().inputs, [key]: value };
-    set({ inputs: newInputs, outputs: calculateStrap(newInputs) });
-  },
-  recalculate: () => set({ outputs: calculateStrap(get().inputs) }),
-}));
+export const useStrapStore = create<StrapStore>()(
+  persist(
+    (set, get) => ({
+      inputs: defaultInputs,
+      outputs: calculateStrap(defaultInputs),
+      setInput: (key, value) => {
+        const newInputs = { ...get().inputs, [key]: value };
+        set({ inputs: newInputs, outputs: calculateStrap(newInputs) });
+      },
+      recalculate: () => set({ outputs: calculateStrap(get().inputs) }),
+    }),
+    {
+      name: 'strap-calc-draft',
+      partialize: (state) => ({ inputs: state.inputs }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.inputs) {
+          state.outputs = calculateStrap(state.inputs);
+        }
+      },
+    }
+  )
+);

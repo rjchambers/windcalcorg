@@ -171,11 +171,9 @@ const Features = () => (
         <div>
           <p className="text-sm font-semibold text-foreground">Tile Roof Calculator (RAS 127) — Coming soon</p>
           <p className="text-xs text-muted-foreground">Moment-based and uplift-based tile attachment for hip and gable roofs in HVHZ.</p>
-          </div>
-        ))}
-      </div>
         </div>
       </div>
+    </div>
   </section>
 );
 

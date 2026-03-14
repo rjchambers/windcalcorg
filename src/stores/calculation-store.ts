@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { type CalculationInputs, type CalculationOutputs, calculate } from '@/lib/calculation-engine';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,7 +36,9 @@ const defaultInputs: CalculationInputs = {
   riskCategory: 'II',
 };
 
-export const useCalculationStore = create<CalculationStore>((set, get) => ({
+export const useCalculationStore = create<CalculationStore>()(
+  persist(
+    (set, get) => ({
   inputs: defaultInputs,
   outputs: calculate(defaultInputs),
   isDirty: false,
@@ -100,4 +103,15 @@ export const useCalculationStore = create<CalculationStore>((set, get) => ({
     set({ currentCalcId: calc.id, currentProjectId: proj.id });
     return calc.id;
   },
-}));
+    }),
+    {
+      name: 'wind-calc-draft',
+      partialize: (state) => ({ inputs: state.inputs }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.inputs) {
+          state.outputs = calculate(state.inputs);
+        }
+      },
+    }
+  )
+);

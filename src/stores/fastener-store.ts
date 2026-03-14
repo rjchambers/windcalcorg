@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import {
   type FastenerInputs,
   type FastenerOutputs,
@@ -73,7 +74,9 @@ const defaultInputs: FastenerInputs = {
   isHVHZ: true,
 };
 
-export const useFastenerStore = create<FastenerStore>((set, get) => ({
+export const useFastenerStore = create<FastenerStore>()(
+  persist(
+    (set, get) => ({
   inputs: defaultInputs,
   outputs: calculateFastener(defaultInputs),
   tas105Inputs: { rawValues_lbf: [] },
@@ -167,4 +170,18 @@ export const useFastenerStore = create<FastenerStore>((set, get) => ({
     set({ currentCalcId: calc.id, currentProjectId: proj.id });
     return calc.id;
   },
-}));
+    }),
+    {
+      name: 'fastener-calc-draft',
+      partialize: (state) => ({ inputs: state.inputs, tas105Inputs: state.tas105Inputs }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.inputs) {
+          state.outputs = calculateFastener(state.inputs);
+        }
+        if (state?.tas105Inputs?.rawValues_lbf?.length >= 5) {
+          state.tas105Outputs = calculateTAS105(state.tas105Inputs);
+        }
+      },
+    }
+  )
+);

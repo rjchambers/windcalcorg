@@ -2,6 +2,7 @@ import { type CalculationOutputs } from '@/lib/calculation-engine';
 import { useCalculationStore } from '@/stores/calculation-store';
 import { AlertTriangle, AlertCircle, Info, ArrowDown, ArrowUp } from 'lucide-react';
 import InteractiveBuildingDiagram from './InteractiveBuildingDiagram';
+import ConnectorReference from './ConnectorReference';
 
 const ResultsPanel = ({ outputs }: { outputs: CalculationOutputs }) => {
   const { inputs } = useCalculationStore();
@@ -153,6 +154,9 @@ const ResultsPanel = ({ outputs }: { outputs: CalculationOutputs }) => {
           </table>
         </div>
       </div>
+
+      {/* Connector Reference */}
+      <ConnectorReference uplift_lb={Math.abs(outputs.max_net_uplift_lb)} />
 
       {/* Warnings */}
       {outputs.warnings.length > 0 && (

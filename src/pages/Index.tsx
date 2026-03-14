@@ -154,14 +154,14 @@ const features = [
     description: 'Automatic zone assignment with interactive building diagrams. Zone 1, 2E, 3E all computed.',
   },
   {
-    icon: BarChart3,
-    title: 'Comparison Mode',
-    description: 'Compare up to 4 calculation variants side-by-side. Perfect for pitch or exposure studies.',
+    icon: Link2,
+    title: 'Roof-to-Wall Strap Calc',
+    description: 'Full connector schedule from uplift demand to Simpson/MiTek model selection. Permit-ready format with FL Product Approval numbers.',
   },
   {
     icon: Shield,
     title: 'HVHZ Detection',
-    description: 'Auto-detect Miami-Dade and Broward HVHZ requirements from project address.',
+    description: 'HVHZ mode with Miami-Dade (175 mph) and Broward (170 mph) wind speed presets and mandatory Exposure C enforcement.',
   },
 ];
 

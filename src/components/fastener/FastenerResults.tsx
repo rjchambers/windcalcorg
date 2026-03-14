@@ -281,7 +281,7 @@ const DemandBar = ({ ratio }: { ratio: number }) => {
   );
 };
 
-const PatternSummaryCard = ({ outputs, inputs }: { outputs: FastenerOutputs; inputs: any }) => {
+const PatternSummaryCard = ({ outputs, inputs }: { outputs: FastenerOutputs; inputs: FastenerInputs }) => {
   const [copied, setCopied] = useState(false);
 
   const text = outputs.fastenerResults.map(r => {

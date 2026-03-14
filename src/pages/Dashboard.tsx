@@ -38,10 +38,12 @@ const Dashboard = () => {
       supabase.from('projects').select('id, name, address, created_at, updated_at').eq('user_id', user.id).order('updated_at', { ascending: false }),
       supabase.from('wind_calculations').select('id, name, project_id, updated_at').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(50),
       supabase.from('fastener_calculations').select('id, name, project_id, updated_at').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(50),
-    ]).then(([projRes, windRes, fastRes]) => {
+      supabase.from('strap_calculations').select('id, name, project_id, updated_at').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(50),
+    ]).then(([projRes, windRes, fastRes, strapRes]) => {
       setProjects(projRes.data ?? []);
       setWindCalcs(windRes.data ?? []);
       setFastenerCalcs(fastRes.data ?? []);
+      setStrapCalcs((strapRes.data as CalcSummary[]) ?? []);
       setLoading(false);
     });
   }, [user, authLoading, navigate]);

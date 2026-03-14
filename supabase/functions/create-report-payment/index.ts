@@ -50,7 +50,7 @@ serve(async (req) => {
       ],
       mode: "payment",
       success_url: `${req.headers.get("origin")}/payment-success?type=${reportType}`,
-      cancel_url: `${req.headers.get("origin")}/${reportType === "wind" ? "calculator" : "fastener"}`,
+      cancel_url: `${req.headers.get("origin")}/${reportType === "wind" ? "calculator" : reportType === "tile" ? "tile" : "fastener"}`,
       metadata: {
         user_id: user.id,
         report_type: reportType,

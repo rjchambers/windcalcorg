@@ -25,7 +25,7 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
 
     const { reportType } = await req.json();
-    if (!reportType || !["wind", "fastener"].includes(reportType)) {
+    if (!reportType || !["wind", "fastener", "tile"].includes(reportType)) {
       throw new Error("Invalid report type");
     }
 
@@ -50,7 +50,7 @@ serve(async (req) => {
       ],
       mode: "payment",
       success_url: `${req.headers.get("origin")}/payment-success?type=${reportType}`,
-      cancel_url: `${req.headers.get("origin")}/${reportType === "wind" ? "calculator" : "fastener"}`,
+      cancel_url: `${req.headers.get("origin")}/${reportType === "wind" ? "calculator" : reportType === "tile" ? "tile" : "fastener"}`,
       metadata: {
         user_id: user.id,
         report_type: reportType,

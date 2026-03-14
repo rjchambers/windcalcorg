@@ -36,7 +36,7 @@ const PaymentSuccess = () => {
     verify();
   }, [sessionId, user, checkSubscription, setHasReportCredit]);
 
-  const calcPath = reportType === 'wind' ? '/calculator' : '/fastener';
+  const calcPath = reportType === 'wind' ? '/calculator' : reportType === 'tile' ? '/tile' : '/fastener';
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
@@ -55,7 +55,7 @@ const PaymentSuccess = () => {
               <div className="space-y-6">
                 <div className="rounded-lg border border-green-500/30 bg-green-500/5 p-4">
                   <p className="text-sm text-green-700 dark:text-green-400 font-medium">
-                    ✓ Your {reportType === 'wind' ? 'Wind Uplift' : 'Fastener'} report is unlocked — click below to download.
+                    ✓ Your {reportType === 'wind' ? 'Wind Uplift' : reportType === 'tile' ? 'Tile Attachment' : 'Fastener'} report is unlocked — click below to download.
                   </p>
                 </div>
                 <Button

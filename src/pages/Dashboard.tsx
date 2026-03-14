@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [windCalcs, setWindCalcs] = useState<CalcSummary[]>([]);
   const [fastenerCalcs, setFastenerCalcs] = useState<CalcSummary[]>([]);
+  const [strapCalcs, setStrapCalcs] = useState<CalcSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

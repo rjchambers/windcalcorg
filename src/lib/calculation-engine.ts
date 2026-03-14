@@ -1,5 +1,6 @@
 // HVHZ Calc Pro — ASCE 7-22 Chapter 28 Calculation Engine
 // Pure TypeScript, no dependencies
+// Equation references: ASCE 7-22 Eq. 26.10-1, Eq. 28.3-1
 
 export interface CalculationInputs {
   V: number;
@@ -20,6 +21,7 @@ export interface CalculationInputs {
   hasOverhang: boolean;
   overhangWidth: number;
   riskCategory: 'I' | 'II' | 'III' | 'IV';
+  connectionCapacity_lb?: number; // optional: rated uplift capacity of connection (lbs)
 }
 
 export interface Warning {
@@ -31,8 +33,10 @@ export interface Warning {
 export interface ZoneResult {
   zone: string;
   GCpf: number;
+  GCpf_pos: number;
   GCpi: number;
   p_psf: number;
+  p_psf_pos: number;
 }
 
 export interface SpanResult {
@@ -46,6 +50,7 @@ export interface SpanResult {
   total_dl_lb: number;
   net_uplift_lb: number;
   is_critical: boolean;
+  demand_ratio: number | null;
 }
 
 export interface OverhangResult {
@@ -58,9 +63,16 @@ export interface OverhangResult {
   net_OH_lb: number;
 }
 
+export interface Derivation {
+  eq_26_10_1: string;
+  eq_28_3_1: string;
+  zone_a_calc: string;
+}
+
 export interface CalculationOutputs {
   Kz: number;
   qh: number;
+  Kd_applied: number;
   zone_a_ft: number;
   zone_2a_width_ft: number;
   zone_results: ZoneResult[];
@@ -69,6 +81,9 @@ export interface CalculationOutputs {
   warnings: Warning[];
   max_net_uplift_lb: number;
   min_net_uplift_lb: number;
+  critical_zone: string;
+  critical_span_ft: number;
+  derivation: Derivation;
 }
 
 // Kz Table — ASCE 7-22 Table 26.10-1
@@ -96,9 +111,7 @@ export function getKz(exposure: 'B' | 'C' | 'D', h: number): number {
   return KZ_TABLE[KZ_TABLE.length - 1][exposure];
 }
 
-// GCpf Tables — ASCE 7-22 Figure 28.3-1
-// Format: { zone: [[theta, GCpf], ...] }
-// Negative = uplift. We store the critical (negative/uplift) values.
+// GCpf Tables — ASCE 7-22 Figure 28.3-1 (Negative/Uplift)
 const GCPF_GABLE: Record<string, [number, number][]> = {
   '1':  [[0, -0.69], [5, -0.69], [10, -0.45], [20, -0.30], [27, -0.30], [45, -0.20]],
   '1E': [[0, -1.07], [5, -1.07], [10, -0.69], [20, -0.43], [27, -0.41], [45, -0.30]],
@@ -117,6 +130,43 @@ const GCPF_HIP: Record<string, [number, number][]> = {
   '3E': [[0, -0.61], [7, -0.61], [10, -0.61], [27, -0.61], [45, -0.40]],
 };
 
+const GCPF_FLAT: Record<string, [number, number][]> = {
+  '1':  [[0, -0.69], [5, -0.69]],
+  '1E': [[0, -1.07], [5, -1.07]],
+  '2':  [[0, -0.69], [5, -0.69]],
+  '2E': [[0, -1.07], [5, -1.07]],
+  '3':  [[0, -0.47], [5, -0.47]],
+  '3E': [[0, -0.61], [5, -0.61]],
+};
+
+// GCpf Positive (Inward) Tables — ASCE 7-22 Figure 28.3-1
+const GCPF_GABLE_POS: Record<string, [number, number][]> = {
+  '1':  [[0, 0.40], [5, 0.40], [10, 0.53], [20, 0.74], [27, 0.78], [45, 0.80]],
+  '1E': [[0, 0.61], [5, 0.61], [10, 0.81], [20, 1.13], [27, 1.19], [45, 1.21]],
+  '2':  [[0, 0.40], [5, 0.40], [10, 0.40], [20, 0.40], [27, 0.40], [45, 0.40]],
+  '2E': [[0, 0.61], [5, 0.61], [10, 0.61], [20, 0.61], [27, 0.61], [45, 0.61]],
+  '3':  [[0, 0.40], [5, 0.40], [10, 0.40], [20, 0.40], [27, 0.40], [45, 0.40]],
+  '3E': [[0, 0.61], [5, 0.61], [10, 0.61], [20, 0.61], [27, 0.61], [45, 0.61]],
+};
+
+const GCPF_HIP_POS: Record<string, [number, number][]> = {
+  '1':  [[0, 0.40], [7, 0.40], [10, 0.53], [27, 0.78], [45, 0.80]],
+  '1E': [[0, 0.61], [7, 0.61], [10, 0.81], [27, 1.19], [45, 1.21]],
+  '2':  [[0, 0.40], [7, 0.40], [10, 0.40], [27, 0.40], [45, 0.40]],
+  '2E': [[0, 0.61], [7, 0.61], [10, 0.61], [27, 0.61], [45, 0.61]],
+  '3':  [[0, 0.40], [7, 0.40], [10, 0.40], [27, 0.40], [45, 0.40]],
+  '3E': [[0, 0.61], [7, 0.61], [10, 0.61], [27, 0.61], [45, 0.61]],
+};
+
+const GCPF_FLAT_POS: Record<string, [number, number][]> = {
+  '1':  [[0, 0.40], [5, 0.40]],
+  '1E': [[0, 0.61], [5, 0.61]],
+  '2':  [[0, 0.40], [5, 0.40]],
+  '2E': [[0, 0.61], [5, 0.61]],
+  '3':  [[0, 0.40], [5, 0.40]],
+  '3E': [[0, 0.61], [5, 0.61]],
+};
+
 function interpolateGCpf(table: [number, number][], pitch: number): number {
   if (pitch <= table[0][0]) return table[0][1];
   if (pitch >= table[table.length - 1][0]) return table[table.length - 1][1];
@@ -129,22 +179,30 @@ function interpolateGCpf(table: [number, number][], pitch: number): number {
   return table[table.length - 1][1];
 }
 
-const GCPF_FLAT: Record<string, [number, number][]> = {
-  '1':  [[0, -0.69], [5, -0.69]],
-  '1E': [[0, -1.07], [5, -1.07]],
-  '2':  [[0, -0.69], [5, -0.69]],
-  '2E': [[0, -1.07], [5, -1.07]],
-  '3':  [[0, -0.47], [5, -0.47]],
-  '3E': [[0, -0.61], [5, -0.61]],
-};
-
 export function getGCpf(roofType: string, pitch: number, zone: string): number {
   let table: Record<string, [number, number][]>;
   if (roofType === 'hip') table = GCPF_HIP;
-  else if (roofType === 'flat' || roofType === 'monoslope') table = GCPF_FLAT;
-  else table = GCPF_GABLE;
+  else if (roofType === 'flat') {
+    table = GCPF_FLAT;
+    pitch = Math.min(pitch, 5); // cap flat roof pitch
+  } else if (roofType === 'monoslope') {
+    table = GCPF_FLAT; // monoslope not in Ch.28 — use flat as fallback
+    pitch = Math.min(pitch, 5);
+  } else table = GCPF_GABLE;
   const data = table[zone];
   if (!data) return -0.69;
+  return interpolateGCpf(data, pitch);
+}
+
+export function getGCpfPos(roofType: string, pitch: number, zone: string): number {
+  let table: Record<string, [number, number][]>;
+  if (roofType === 'hip') table = GCPF_HIP_POS;
+  else if (roofType === 'flat' || roofType === 'monoslope') {
+    table = GCPF_FLAT_POS;
+    pitch = Math.min(pitch, 5);
+  } else table = GCPF_GABLE_POS;
+  const data = table[zone];
+  if (!data) return 0.40;
   return interpolateGCpf(data, pitch);
 }
 
@@ -172,11 +230,12 @@ export function validateInputs(inputs: CalculationInputs): Warning[] {
   if (inputs.pitchDegrees < 7 && inputs.roofType === 'hip') {
     warnings.push({ level: 'warning', message: 'Hip roof with θ < 7° is outside Ch. 28 hip range. Using gable/flat table.', reference: 'Fig. 28.3-1' });
   }
-  if (inputs.roofType === 'monoslope' && inputs.pitchDegrees > 30) {
-    warnings.push({ level: 'error', message: 'Monoslope roof θ > 30° exceeds Ch. 28 Envelope Procedure limits. Use Directional Procedure.', reference: '§28.1.2' });
+  // Issue 3: Monoslope not covered by Ch.28
+  if (inputs.roofType === 'monoslope') {
+    warnings.push({ level: 'error', message: 'Monoslope roofs are not covered by ASCE 7-22 Ch. 28 Envelope Procedure. Use Ch. 27 Directional Procedure.', reference: '§28.1.2' });
   }
   if (inputs.roofType === 'flat' && inputs.pitchDegrees > 5) {
-    warnings.push({ level: 'warning', message: 'Roof pitch > 5° with flat roof type selected. Verify roof type selection.', reference: 'Fig. 28.3-1' });
+    warnings.push({ level: 'warning', message: 'Flat roof type selected with pitch > 5°. Using gable GCpf capped at θ = 5°.', reference: 'Fig. 28.3-1' });
   }
   const ratio = Math.max(inputs.buildingLength, inputs.buildingWidth) / Math.min(inputs.buildingLength, inputs.buildingWidth);
   if (ratio > 5) {
@@ -188,50 +247,59 @@ export function validateInputs(inputs: CalculationInputs): Warning[] {
   if (inputs.Kzt !== 1.0) {
     warnings.push({ level: 'info', message: 'Topographic amplification applied. Confirm K_zt with site survey.', reference: '§26.8' });
   }
+  // Issue 4: HVHZ Exposure C enforcement (inferred from wind speed)
+  if (inputs.V >= 160 && inputs.exposureCategory === 'B') {
+    warnings.push({ level: 'error', message: 'Wind speed ≥ 160 mph suggests HVHZ. Exposure B is not permitted — use Exposure C per FBC §1620.1 / ASCE 7-22 §26.7.3.', reference: '§26.7.3' });
+  }
+  if (inputs.V >= 160 && inputs.exposureCategory === 'D') {
+    warnings.push({ level: 'warning', message: 'Exposure D with V ≥ 160 mph. Confirm site is within 600 ft of open water per §26.7.3.', reference: '§26.7.3' });
+  }
+  // Issue 11: Minimum qh check
+  const qh_check = 0.00256 * getKz(inputs.exposureCategory, inputs.h) * inputs.Kzt * inputs.Ke * inputs.V * inputs.V;
+  if (qh_check < 10) {
+    warnings.push({ level: 'warning', message: `Computed qh = ${qh_check.toFixed(2)} psf is very low. Verify wind speed input. Minimum design pressure per §26.1.4 may govern.`, reference: '§26.1.4' });
+  }
   return warnings;
 }
 
 export function calculate(inputs: CalculationInputs): CalculationOutputs {
   const warnings = validateInputs(inputs);
   const Kz = getKz(inputs.exposureCategory, inputs.h);
-  const qh = 0.00256 * Kz * inputs.Kzt * inputs.Kd * inputs.Ke * inputs.V * inputs.V;
+  // Issue 1: ASCE 7-22 Eq. 26.10-1 — Kd removed from qh
+  const qh = 0.00256 * Kz * inputs.Kzt * inputs.Ke * inputs.V * inputs.V;
   const leastDim = Math.min(inputs.buildingWidth, inputs.buildingLength);
   const zone_a = getZoneA(leastDim, inputs.h);
 
   const GCpi = getGCpi(inputs.enclosureType);
   const zones = ['1', '1E', '2', '2E', '3', '3E'];
+
+  // Issue 6: Compute both uplift (negative) and inward (positive) pressures
   const zone_results: ZoneResult[] = zones.map(zone => {
     const GCpf = getGCpf(inputs.roofType, inputs.pitchDegrees, zone);
-    const p = qh * (GCpf - GCpi);
-    return { zone, GCpf, GCpi, p_psf: p };
+    const GCpf_pos = getGCpfPos(inputs.roofType, inputs.pitchDegrees, zone);
+    // Issue 1: Kd applied at pressure step per ASCE 7-22 Eq. 28.3-1
+    const p = qh * inputs.Kd * (GCpf - GCpi);
+    const p_pos = qh * inputs.Kd * (GCpf_pos + GCpi);
+    return { zone, GCpf, GCpf_pos, GCpi, p_psf: p, p_psf_pos: p_pos };
   });
 
-  // For simplicity, compute spans for Zone 1 (interior) and Zone 2E (edge)
+  // Issue 2: All 6 zones for span results
   const span_results: SpanResult[] = [];
-  const activeZones = ['1', '2E'];
+  const activeZones = ['1', '1E', '2', '2E', '3', '3E'];
+  const capacity = inputs.connectionCapacity_lb ?? null;
 
   for (const zone of activeZones) {
     const GCpf = getGCpf(inputs.roofType, inputs.pitchDegrees, zone);
-    const p = qh * (GCpf - GCpi);
+    const p = qh * inputs.Kd * (GCpf - GCpi);
 
     for (const span of inputs.spans) {
       const trib = inputs.trussSpacing * (span / 2);
       const windForce = p * trib;
-      let dlForce: number;
-      let netUplift: number;
       let ohWindForce = 0;
-
-      if (inputs.designBasis === 'ASD') {
-        dlForce = inputs.deadLoad * trib * 0.6;
-        netUplift = windForce + dlForce;
-      } else {
-        dlForce = inputs.deadLoad * trib * 0.9;
-        netUplift = 1.0 * windForce + dlForce;
-      }
 
       // Overhang
       if (inputs.hasOverhang && inputs.overhangWidth > 0) {
-        const pSoffit = -0.8 * qh;
+        const pSoffit = -0.8 * qh * inputs.Kd;
         const pOhNet = p + pSoffit;
         const aOh = inputs.overhangWidth * inputs.trussSpacing;
         ohWindForce = pOhNet * aOh;
@@ -243,6 +311,9 @@ export function calculate(inputs: CalculationInputs): CalculationOutputs {
         : inputs.deadLoad * (trib + (inputs.hasOverhang ? inputs.overhangWidth * inputs.trussSpacing : 0)) * 0.9;
       const totalNet = totalWind + totalDl;
 
+      // Issue 5: demand_ratio based on connection capacity
+      const dr = capacity ? Math.abs(totalNet) / capacity : null;
+
       span_results.push({
         span_ft: span,
         trib_area_ft2: trib,
@@ -253,7 +324,8 @@ export function calculate(inputs: CalculationInputs): CalculationOutputs {
         total_wind_force_lb: Math.round(totalWind),
         total_dl_lb: Math.round(totalDl),
         net_uplift_lb: Math.round(totalNet),
-        is_critical: totalNet < -500,
+        is_critical: totalNet < -(capacity ?? 500),
+        demand_ratio: dr ? Math.round(dr * 1000) / 1000 : null,
       });
     }
   }
@@ -261,8 +333,8 @@ export function calculate(inputs: CalculationInputs): CalculationOutputs {
   let overhang: OverhangResult | null = null;
   if (inputs.hasOverhang && inputs.overhangWidth > 0) {
     const GCpf_adj = getGCpf(inputs.roofType, inputs.pitchDegrees, '2E');
-    const pTop = qh * (GCpf_adj - GCpi);
-    const pSoffit = -0.8 * qh;
+    const pTop = qh * inputs.Kd * (GCpf_adj - GCpi);
+    const pSoffit = -0.8 * qh * inputs.Kd;
     const pNet = pTop + pSoffit;
     const area = inputs.overhangWidth * inputs.trussSpacing;
     const fOhWind = pNet * area;
@@ -279,17 +351,30 @@ export function calculate(inputs: CalculationInputs): CalculationOutputs {
   }
 
   const uplifts = span_results.map(r => r.net_uplift_lb);
+  const worstUplift = Math.min(...uplifts);
+  const criticalResult = span_results.find(r => r.net_uplift_lb === worstUplift);
+
+  // Issue 12: Derivation chain
+  const derivation: Derivation = {
+    eq_26_10_1: `qh = 0.00256 × Kz × Kzt × Ke × V² = 0.00256 × ${Kz.toFixed(3)} × ${inputs.Kzt} × ${inputs.Ke} × ${inputs.V}² = ${qh.toFixed(2)} psf [ASCE 7-22 Eq. 26.10-1]`,
+    eq_28_3_1: `p = qh × Kd × (GCpf − GCpi) = ${qh.toFixed(2)} × ${inputs.Kd} × (GCpf − ${GCpi.toFixed(2)}) [ASCE 7-22 Eq. 28.3-1]`,
+    zone_a_calc: `a = min(0.1×${leastDim}, 0.4×${inputs.h}) but ≥ max(0.04×${leastDim}, 3.0) = ${zone_a.toFixed(2)} ft [ASCE 7-22 §28.3.2]`,
+  };
 
   return {
     Kz: Math.round(Kz * 1000) / 1000,
     qh: Math.round(qh * 100) / 100,
+    Kd_applied: inputs.Kd,
     zone_a_ft: Math.round(zone_a * 100) / 100,
     zone_2a_width_ft: Math.round(zone_a * 2 * 100) / 100,
     zone_results,
     span_results,
     overhang,
     warnings,
-    max_net_uplift_lb: Math.min(...uplifts),
+    max_net_uplift_lb: worstUplift,
     min_net_uplift_lb: Math.max(...uplifts),
+    critical_zone: criticalResult?.zone ?? '1',
+    critical_span_ft: criticalResult?.span_ft ?? 0,
+    derivation,
   };
 }

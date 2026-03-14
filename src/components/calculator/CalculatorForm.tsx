@@ -5,8 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Info, Plus, X } from 'lucide-react';
+import { Info, Plus, X, HelpCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 const FieldLabel = ({ label, ref_text }: { label: string; ref_text?: string }) => (
   <div className="flex items-center gap-1.5">
@@ -25,35 +26,18 @@ const FieldLabel = ({ label, ref_text }: { label: string; ref_text?: string }) =
 );
 
 const NumericInput = ({
-  label,
-  value,
-  onChange,
-  unit,
-  ref_text,
-  step = 1,
+  label, value, onChange, unit, ref_text, step = 1, children,
 }: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-  unit?: string;
-  ref_text?: string;
-  step?: number;
+  label: string; value: number; onChange: (v: number) => void; unit?: string; ref_text?: string; step?: number; children?: React.ReactNode;
 }) => (
   <div className="space-y-1">
-    <FieldLabel label={label} ref_text={ref_text} />
+    <div className="flex items-center gap-1.5">
+      <FieldLabel label={label} ref_text={ref_text} />
+      {children}
+    </div>
     <div className="relative">
-      <Input
-        type="number"
-        value={value}
-        step={step}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-        className="font-mono text-sm pr-12"
-      />
-      {unit && (
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">
-          {unit}
-        </span>
-      )}
+      <Input type="number" value={value} step={step} onChange={(e) => onChange(parseFloat(e.target.value) || 0)} className="font-mono text-sm pr-12" />
+      {unit && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">{unit}</span>}
     </div>
   </div>
 );
@@ -63,6 +47,27 @@ const SectionTitle = ({ title }: { title: string }) => (
     <h3 className="font-display text-xs font-semibold uppercase tracking-wider text-primary">{title}</h3>
     <Separator className="mt-2" />
   </div>
+);
+
+const WindSpeedHelper = () => (
+  <Popover>
+    <PopoverTrigger asChild>
+      <button type="button" className="text-muted-foreground hover:text-primary transition-colors">
+        <HelpCircle className="h-3.5 w-3.5" />
+      </button>
+    </PopoverTrigger>
+    <PopoverContent side="right" className="w-72 text-xs space-y-2">
+      <p className="font-semibold text-foreground">Finding Your Design Wind Speed</p>
+      <p className="text-muted-foreground">For Florida, typical values (Risk Cat. II):</p>
+      <ul className="text-muted-foreground space-y-1 pl-3 list-disc">
+        <li>Miami-Dade / Broward (HVHZ): 170–185 mph</li>
+        <li>Palm Beach, Monroe: 160–175 mph</li>
+        <li>Central FL (Orlando area): 130–140 mph</li>
+        <li>North FL (Jacksonville): 120–130 mph</li>
+      </ul>
+      <p className="text-muted-foreground">For exact values, use the <span className="text-primary font-medium">ASCE Hazards Tool</span> with your site coordinates.</p>
+    </PopoverContent>
+  </Popover>
 );
 
 const CalculatorForm = () => {
@@ -96,7 +101,9 @@ const CalculatorForm = () => {
         onChange={(v) => setInput('V', v)}
         unit="mph"
         ref_text="ASCE 7-22 Fig. 26.5-1A/B/C"
-      />
+      >
+        <WindSpeedHelper />
+      </NumericInput>
 
       <div className="space-y-1">
         <FieldLabel label="Risk Category" ref_text="ASCE 7-22 Table 1.5-1" />
@@ -145,14 +152,7 @@ const CalculatorForm = () => {
         </Select>
       </div>
 
-      <NumericInput
-        label="Roof Pitch (θ)"
-        value={inputs.pitchDegrees}
-        onChange={(v) => setInput('pitchDegrees', v)}
-        unit="deg"
-        step={0.1}
-        ref_text="Range: 0°–45°"
-      />
+      <NumericInput label="Roof Pitch (θ)" value={inputs.pitchDegrees} onChange={(v) => setInput('pitchDegrees', v)} unit="deg" step={0.1} ref_text="Range: 0°–45°" />
 
       <SectionTitle title="Structural" />
 
@@ -191,13 +191,7 @@ const CalculatorForm = () => {
           <div key={i} className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground font-mono w-16">Span {i + 1}:</span>
             <div className="relative flex-1">
-              <Input
-                type="number"
-                value={span}
-                step={1}
-                onChange={(e) => handleSpanChange(i, parseFloat(e.target.value) || 0)}
-                className="font-mono text-sm pr-10"
-              />
+              <Input type="number" value={span} step={1} onChange={(e) => handleSpanChange(i, parseFloat(e.target.value) || 0)} className="font-mono text-sm pr-10" />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">ft</span>
             </div>
             <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => handleRemoveSpan(i)} disabled={inputs.spans.length <= 1}>
@@ -214,10 +208,7 @@ const CalculatorForm = () => {
 
       <div className="flex items-center justify-between">
         <FieldLabel label="Include Overhang" ref_text="ASCE 7-22 §28.3.3" />
-        <Switch
-          checked={inputs.hasOverhang}
-          onCheckedChange={(v) => setInput('hasOverhang', v)}
-        />
+        <Switch checked={inputs.hasOverhang} onCheckedChange={(v) => setInput('hasOverhang', v)} />
       </div>
 
       {inputs.hasOverhang && (

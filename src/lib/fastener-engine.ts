@@ -441,7 +441,7 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
   const warnings = validateFastenerInputs(inputs);
 
   const Kh = getKh(inputs.exposureCategory, inputs.h);
-  const qh_ASD = 0.00256 * Kh * inputs.Kzt * inputs.Ke * inputs.V * inputs.V * 0.6;
+  const qh_ASD = 0.00256 * Kh * inputs.Kzt * inputs.Kd * inputs.Ke * inputs.V * inputs.V * 0.6;
   const GCpi = inputs.enclosure === 'partially_enclosed' ? 0.55 :
     inputs.enclosure === 'enclosed' ? 0.18 : 0;
 

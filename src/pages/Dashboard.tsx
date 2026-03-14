@@ -87,7 +87,7 @@ const Dashboard = () => {
 
       <div className="container mx-auto px-6 py-8 space-y-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <Card>
             <CardContent className="flex items-center gap-4 p-6">
               <FolderOpen className="h-8 w-8 text-primary" />

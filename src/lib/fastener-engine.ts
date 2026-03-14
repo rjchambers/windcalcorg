@@ -1,6 +1,7 @@
-// FastenerCalc HVHZ — Calculation Engine v3.0
+// FastenerCalc HVHZ — Calculation Engine v4.0
 // FBC 8th Edition (2023) · ASCE 7-22 Ch. 30 C&C · RAS 117 · 128 · 137 · TAS 105
 // Low-slope (≤ 7°) mechanically attached roofing systems ONLY
+// Equation references: ASCE 7-22 Eq. 26.10-1, Eq. 30.3-1, Figure 30.3-2A
 
 // ──── Types ────
 
@@ -24,6 +25,7 @@ export interface NOAParams {
   productName?: string;
   systemNumber?: string;
   mdp_psf: number;        // stored negative, e.g. -60.0
+  mdp_basis?: 'asd' | 'ultimate'; // Issue 9: clarify MDP basis level
   asterisked: boolean;     // only true for (*) marked assemblies
 }
 
@@ -67,6 +69,10 @@ export interface FastenerInputs {
   // County/HVHZ
   county: 'miami_dade' | 'broward' | 'other';
   isHVHZ: boolean;
+
+  // Issue 7: Effective Wind Area overrides
+  ewa_membrane_ft2?: number;
+  ewa_insulation_ft2?: number;
 }
 
 export interface FastenerWarning {
@@ -81,6 +87,8 @@ export interface ZonePressures {
   zone2: number;
   zone3: number;
   zoneWidth_ft: number;
+  zone3_depth_ft: number;  // Issue 8: 0.2h ASCE 7-22 L-shape
+  zone3_length_ft: number; // Issue 8: 0.6h ASCE 7-22 L-shape
 }
 
 export interface NOAZoneResult {
@@ -133,6 +141,13 @@ export interface TAS105Outputs {
   pass: boolean;
 }
 
+export interface FastenerDerivation {
+  eq_26_10_1: string;
+  qh_asd: string;
+  eq_30_3_1: string;
+  ras117_fs: string;
+}
+
 export interface FastenerOutputs {
   qh_ASD: number;
   Kh: number;
@@ -146,6 +161,9 @@ export interface FastenerOutputs {
   halfSheetZones: string[];
   minFS_in: number;
   overallStatus: 'ok' | 'warning' | 'fail';
+  ewa_membrane_ft2: number;
+  ewa_insulation_ft2: number;
+  derivation: FastenerDerivation;
 }
 
 // ──── Kh Table (ASCE 7-22 Table 26.10-1) ────
@@ -174,17 +192,30 @@ export function getKh(exposure: 'B' | 'C' | 'D', h: number): number {
   return KH_TABLE[KH_TABLE.length - 1][exposure];
 }
 
-// ──── GCp Values (C&C, EWA = 10 ft², low-slope only) ────
+// ──── Issue 7: GCp vs EWA — ASCE 7-22 Figure 30.3-2A log-linear interpolation ────
 
-const GCP_LOW_SLOPE: Record<string, number> = {
-  "1'": -0.90,
-  '1': -1.70,
-  '2': -2.30,
-  '3': -3.20,
+const GCP_AREA_TABLE: Record<string, [number, number][]> = {
+  "1'": [[10, -0.90], [200, -0.90]], // flat, no area reduction for zone 1'
+  '1':  [[10, -1.70], [200, -0.90]],
+  '2':  [[10, -2.30], [200, -1.40]],
+  '3':  [[10, -3.20], [200, -1.80]],
 };
 
+export function getGCpByArea(zone: string, ewa_ft2: number): number {
+  const table = GCP_AREA_TABLE[zone] ?? GCP_AREA_TABLE['1'];
+  const EWA = Math.max(10, Math.min(ewa_ft2, 200)); // clamp to [10, 200]
+  const lo = table[0], hi = table[table.length - 1];
+  // Log-linear interpolation per ASCE 7-22 Figure 30.3-2A
+  const logEWA = Math.log10(EWA);
+  const logLo = Math.log10(lo[0]);
+  const logHi = Math.log10(hi[0]);
+  const frac = logHi === logLo ? 0 : (logEWA - logLo) / (logHi - logLo);
+  return lo[1] + frac * (hi[1] - lo[1]);
+}
+
+// Legacy static lookup (kept for backward compat, but not used in main calc)
 export function getGCp(zone: string): number {
-  return GCP_LOW_SLOPE[zone] ?? GCP_LOW_SLOPE['1'];
+  return getGCpByArea(zone, 10);
 }
 
 // ──── Zone Width (low-slope: 0.6h) ────
@@ -195,15 +226,18 @@ export function getZoneWidth(h: number): number {
 
 // ──── Zone Pressures ────
 
-export function getZonePressures(inputs: FastenerInputs, qh_ASD: number): ZonePressures {
+export function getZonePressures(inputs: FastenerInputs, qh_ASD: number, ewa_ft2 = 10): ZonePressures {
   const GCpi = inputs.enclosure === 'partially_enclosed' ? 0.55 :
     inputs.enclosure === 'enclosed' ? 0.18 : 0;
   
   const h_effective = inputs.h + (inputs.parapetHeight ?? 0);
   const zoneWidth = getZoneWidth(h_effective);
+  // Issue 8: Zone 3 L-shape geometry per ASCE 7-22
+  const zone3Depth = 0.2 * h_effective;
+  const zone3Length = 0.6 * h_effective;
 
   const calcP = (zone: string) => {
-    const GCp = getGCp(zone);
+    const GCp = getGCpByArea(zone, ewa_ft2);
     return qh_ASD * (GCp - GCpi);
   };
 
@@ -217,6 +251,8 @@ export function getZonePressures(inputs: FastenerInputs, qh_ASD: number): ZonePr
     zone2: calcP('2'),
     zone3: calcP('3'),
     zoneWidth_ft: Math.round(zoneWidth * 100) / 100,
+    zone3_depth_ft: Math.round(zone3Depth * 100) / 100,
+    zone3_length_ft: Math.round(zone3Length * 100) / 100,
   };
 }
 
@@ -256,7 +292,6 @@ export function checkNOACompatibility(
         blocksCalculation: true,
       };
     }
-    // Normal RAS 117 rational analysis path
     return {
       zone, P_psf: P, MDP_psf: mdp_psf, extrapFactor: factor,
       basis: 'rational_analysis' as ZoneAttachmentBasis,
@@ -337,6 +372,30 @@ function calcInsulation(P: number, boardArea: number, Fy: number, zone: string):
   };
 }
 
+// ──── Issue 10: TAS 105 t-Factor — Full Per-n Table ────
+
+const T_TABLE: Record<number, number> = {
+  3: 2.920, 4: 2.353, 5: 2.132, 6: 2.015,
+  7: 1.943, 8: 1.895, 9: 1.860, 10: 1.833,
+  11: 1.812, 12: 1.796, 15: 1.761, 20: 1.725,
+  25: 1.708, 30: 1.697,
+};
+
+function getTFactor(n: number): number {
+  if (n <= 2) return 3.078;
+  if (n >= 30) return 1.645;
+  // Direct lookup
+  if (T_TABLE[n] !== undefined) return T_TABLE[n];
+  // Interpolate between nearest table entries
+  const keys = Object.keys(T_TABLE).map(Number).sort((a, b) => a - b);
+  const upper = keys.find(k => k >= n);
+  const lower = [...keys].reverse().find(k => k <= n);
+  if (upper === lower || upper === undefined) return T_TABLE[upper ?? keys[keys.length - 1]];
+  if (lower === undefined) return T_TABLE[upper];
+  const frac = (n - lower) / (upper - lower);
+  return T_TABLE[lower] + frac * (T_TABLE[upper] - T_TABLE[lower]);
+}
+
 // ──── TAS 105 MCRF ────
 
 export function calculateTAS105(inputs: TAS105Inputs): TAS105Outputs {
@@ -348,7 +407,7 @@ export function calculateTAS105(inputs: TAS105Inputs): TAS105Outputs {
   const mean = inputs.rawValues_lbf.reduce((a, b) => a + b, 0) / n;
   const variance = inputs.rawValues_lbf.reduce((sum, v) => sum + (v - mean) ** 2, 0) / (n - 1);
   const stdDev = Math.sqrt(variance || 0);
-  const tFactor = n >= 10 ? 1.645 : 2.010;
+  const tFactor = getTFactor(n);
   const MCRF = mean - tFactor * stdDev;
 
   return {
@@ -397,6 +456,11 @@ export function validateFastenerInputs(inputs: FastenerInputs): FastenerWarning[
     warnings.push({ level: 'error', message: 'FBC §1521 prohibits recover over more than one existing roof layer in HVHZ.', reference: '§1521' });
   }
   
+  // Issue 11: HVHZ minimum wind speed check
+  if (inputs.isHVHZ && inputs.V < 150) {
+    warnings.push({ level: 'error', message: `Design wind speed ${inputs.V} mph is below the HVHZ minimum. FBC §1620.1 requires minimum 150 mph for Risk Category II in HVHZ.`, reference: 'FBC §1620.1' });
+  }
+
   // TAS 105 warnings
   const tas105check = isTAS105Required(inputs.deckType, inputs.constructionType);
   if (tas105check.required && inputs.fySource !== 'tas105') {
@@ -418,6 +482,11 @@ export function validateFastenerInputs(inputs: FastenerInputs): FastenerWarning[
   // NOA warnings
   if (!inputs.noa.mdp_psf) {
     warnings.push({ level: 'error', message: 'NOA Maximum Design Pressure (MDP) is required.', reference: 'NOA' });
+  }
+
+  // Issue 9: MDP high-value warning
+  if (Math.abs(inputs.noa.mdp_psf) > 200) {
+    warnings.push({ level: 'warning', message: `NOA MDP of ${Math.abs(inputs.noa.mdp_psf)} psf is unusually high. Confirm this is the ASD-level MDP (after TAS 114 2:1 safety factor), not the ultimate test pressure.`, reference: 'TAS 114' });
   }
 
   if (inputs.enclosure === 'partially_enclosed') {
@@ -446,9 +515,22 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
   const GCpi = inputs.enclosure === 'partially_enclosed' ? 0.55 :
     inputs.enclosure === 'enclosed' ? 0.18 : 0;
 
-  const zonePressures = getZonePressures(inputs, qh_ASD);
+  // Issue 7: EWA-based zone pressures
+  const ewa_membrane = inputs.ewa_membrane_ft2 ?? 10; // default to 10 (conservative)
+  const ewa_insulation = inputs.ewa_insulation_ft2 ?? (inputs.boardLength_ft * inputs.boardWidth_ft);
 
-  // NOA Compatibility Check (corrected 3-state)
+  // Issue 9: MDP basis conversion
+  const mdp_effective = inputs.noa.mdp_basis === 'ultimate'
+    ? inputs.noa.mdp_psf / 2
+    : inputs.noa.mdp_psf;
+
+  if (inputs.noa.mdp_basis === 'ultimate') {
+    warnings.push({ level: 'info', message: `Ultimate MDP (${inputs.noa.mdp_psf} psf) converted to ASD: ${mdp_effective} psf (÷2 per TAS 114).`, reference: 'TAS 114' });
+  }
+
+  const zonePressures = getZonePressures(inputs, qh_ASD, ewa_membrane);
+
+  // NOA Compatibility Check (using effective MDP)
   const zonePressureMap: Record<string, number> = {
     "1'": zonePressures.zone1prime,
     '1': zonePressures.zone1,
@@ -458,7 +540,7 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
 
   const noaResults = checkNOACompatibility(
     zonePressureMap,
-    inputs.noa.mdp_psf,
+    mdp_effective,
     inputs.noa.asterisked
   );
 
@@ -478,7 +560,6 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
         reference: 'NOA',
       });
     }
-    // Near 300% info
     if (nr.basis === 'rational_analysis' && nr.extrapFactor > 2.7) {
       warnings.push({
         level: 'info',
@@ -488,7 +569,6 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
     }
   }
 
-  // All zones prescriptive info
   if (noaResults.every(nr => nr.basis === 'prescriptive')) {
     warnings.push({
       level: 'info',
@@ -497,7 +577,15 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
     });
   }
 
-  // Fastener spacing per zone
+  // Issue 12: Derivation chain
+  const qh_lrfd = 0.00256 * Kh * inputs.Kzt * inputs.Ke * inputs.V * inputs.V;
+  const derivation: FastenerDerivation = {
+    eq_26_10_1: `qh = 0.00256 × ${Kh.toFixed(3)} × ${inputs.Kzt} × ${inputs.Ke} × ${inputs.V}² = ${qh_lrfd.toFixed(2)} psf [ASCE 7-22 Eq. 26.10-1]`,
+    qh_asd: `qh,ASD = ${qh_lrfd.toFixed(2)} × 0.6 = ${qh_ASD.toFixed(2)} psf [ASCE 7-22 ASD factor]`,
+    eq_30_3_1: `p = qh,ASD × (GCp − GCpi) = ${qh_ASD.toFixed(2)} × (GCp − ${GCpi.toFixed(2)}) [ASCE 7-22 Eq. 30.3-1]`,
+    ras117_fs: `FS = (Fy × 144) / (|P| × RS) [RAS 117 §6 rational analysis]`,
+  };
+
   // Adhered membrane: no fastener spacing calculation
   if (inputs.systemType === 'adhered') {
     warnings.push({
@@ -508,8 +596,16 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
 
     const boardArea = inputs.boardLength_ft * inputs.boardWidth_ft;
     const zoneKeys = ["1'", '1', '2', '3'] as const;
+    // Use insulation EWA for insulation calcs
+    const zonePressures_ins = getZonePressures(inputs, qh_ASD, ewa_insulation);
+    const insPressureMap: Record<string, number> = {
+      "1'": zonePressures_ins.zone1prime,
+      '1': zonePressures_ins.zone1,
+      '2': zonePressures_ins.zone2,
+      '3': zonePressures_ins.zone3,
+    };
     const insulationResults: InsulationZoneResult[] = zoneKeys.map(zone =>
-      calcInsulation(zonePressureMap[zone], boardArea, inputs.insulation_Fy_lbf || inputs.Fy_lbf, zone)
+      calcInsulation(insPressureMap[zone], boardArea, inputs.insulation_Fy_lbf || inputs.Fy_lbf, zone)
     );
     const maxExtrap = Math.max(...noaResults.map(r => r.extrapFactor), 0);
     const hasErrors = warnings.some(w => w.level === 'error');
@@ -528,9 +624,13 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
       halfSheetZones: [],
       minFS_in: 0,
       overallStatus: hasErrors ? 'fail' : hasWarnings_adhered ? 'warning' : 'ok',
+      ewa_membrane_ft2: ewa_membrane,
+      ewa_insulation_ft2: ewa_insulation,
+      derivation,
     };
   }
 
+  // Fastener spacing per zone
   const NW = inputs.sheetWidth_in - inputs.lapWidth_in;
   const zoneKeys = ["1'", '1', '2', '3'] as const;
 
@@ -570,10 +670,17 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
     });
   }
 
-  // Insulation
+  // Insulation — use insulation EWA
   const boardArea = inputs.boardLength_ft * inputs.boardWidth_ft;
+  const zonePressures_ins = getZonePressures(inputs, qh_ASD, ewa_insulation);
+  const insPressureMap: Record<string, number> = {
+    "1'": zonePressures_ins.zone1prime,
+    '1': zonePressures_ins.zone1,
+    '2': zonePressures_ins.zone2,
+    '3': zonePressures_ins.zone3,
+  };
   const insulationResults: InsulationZoneResult[] = zoneKeys.map(zone =>
-    calcInsulation(zonePressureMap[zone], boardArea, inputs.insulation_Fy_lbf || inputs.Fy_lbf, zone)
+    calcInsulation(insPressureMap[zone], boardArea, inputs.insulation_Fy_lbf || inputs.Fy_lbf, zone)
   );
 
   const maxExtrap = Math.max(...noaResults.map(r => r.extrapFactor), 0);
@@ -594,5 +701,8 @@ export function calculateFastener(inputs: FastenerInputs): FastenerOutputs {
     halfSheetZones,
     minFS_in: minFS,
     overallStatus: hasErrors ? 'fail' : hasWarnings ? 'warning' : 'ok',
+    ewa_membrane_ft2: ewa_membrane,
+    ewa_insulation_ft2: ewa_insulation,
+    derivation,
   };
 }

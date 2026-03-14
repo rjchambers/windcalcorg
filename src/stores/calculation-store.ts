@@ -103,4 +103,15 @@ export const useCalculationStore = create<CalculationStore>()(
     set({ currentCalcId: calc.id, currentProjectId: proj.id });
     return calc.id;
   },
-}));
+    }),
+    {
+      name: 'wind-calc-draft',
+      partialize: (state) => ({ inputs: state.inputs }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.inputs) {
+          state.outputs = calculate(state.inputs);
+        }
+      },
+    }
+  )
+);

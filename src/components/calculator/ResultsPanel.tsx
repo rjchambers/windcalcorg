@@ -155,6 +155,9 @@ const ResultsPanel = ({ outputs }: { outputs: CalculationOutputs }) => {
         </div>
       </div>
 
+      {/* Connector Reference */}
+      <ConnectorReference uplift_lb={Math.abs(outputs.max_net_uplift_lb)} />
+
       {/* Warnings */}
       {outputs.warnings.length > 0 && (
         <div className="space-y-2">

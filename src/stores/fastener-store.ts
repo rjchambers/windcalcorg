@@ -170,4 +170,18 @@ export const useFastenerStore = create<FastenerStore>()(
     set({ currentCalcId: calc.id, currentProjectId: proj.id });
     return calc.id;
   },
-}));
+    }),
+    {
+      name: 'fastener-calc-draft',
+      partialize: (state) => ({ inputs: state.inputs, tas105Inputs: state.tas105Inputs }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.inputs) {
+          state.outputs = calculateFastener(state.inputs);
+        }
+        if (state?.tas105Inputs?.rawValues_lbf?.length >= 5) {
+          state.tas105Outputs = calculateTAS105(state.tas105Inputs);
+        }
+      },
+    }
+  )
+);

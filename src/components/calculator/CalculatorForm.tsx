@@ -94,6 +94,11 @@ const CalculatorForm = () => {
     <div className="space-y-3 p-4">
       <h2 className="font-display text-lg font-bold text-foreground">Input Parameters</h2>
 
+      <SiteLookup onApply={(vals) => {
+        setInput('V', vals.V);
+        setInput('exposureCategory', vals.exposure);
+      }} />
+
       <SectionTitle title="Wind & Site" />
 
       <NumericInput

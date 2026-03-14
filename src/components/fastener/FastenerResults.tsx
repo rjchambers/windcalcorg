@@ -83,6 +83,14 @@ const FastenerResults = () => {
       </div>
 
       {/* Fastener Pattern Results */}
+      {outputs.fastenerResults.length === 0 && inputs.systemType === 'adhered' ? (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+          <h3 className="font-display text-sm font-semibold text-foreground mb-2">Adhered Membrane System</h3>
+          <p className="text-xs text-muted-foreground">
+            Mechanical fastener spacing does not apply. Verify NOA adhesive bond value (psf) ≥ zone pressure for all zones. See zone pressure table above.
+          </p>
+        </div>
+      ) : (
       <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="border-b border-border bg-card p-3 flex items-center justify-between">
           <h3 className="font-display text-sm font-semibold text-foreground">Fastener Pattern Results — RAS {inputs.systemType === 'single_ply' ? '137' : '117'}</h3>
@@ -129,6 +137,7 @@ const FastenerResults = () => {
           </table>
         </div>
       </div>
+      )}
 
       <PatternSummaryCard outputs={outputs} inputs={inputs} />
 

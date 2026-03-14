@@ -74,7 +74,9 @@ const defaultInputs: FastenerInputs = {
   isHVHZ: true,
 };
 
-export const useFastenerStore = create<FastenerStore>((set, get) => ({
+export const useFastenerStore = create<FastenerStore>()(
+  persist(
+    (set, get) => ({
   inputs: defaultInputs,
   outputs: calculateFastener(defaultInputs),
   tas105Inputs: { rawValues_lbf: [] },

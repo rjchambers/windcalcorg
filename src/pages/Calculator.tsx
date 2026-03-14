@@ -1,4 +1,4 @@
-import { Wind, ArrowLeft, Wrench } from 'lucide-react';
+import { Wind, ArrowLeft, Wrench, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useCalculationStore } from '@/stores/calculation-store';

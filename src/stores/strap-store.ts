@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { type StrapInputs, type StrapOutputs, calculateStrap } from '@/lib/strap-engine';
 
 interface StrapStore {

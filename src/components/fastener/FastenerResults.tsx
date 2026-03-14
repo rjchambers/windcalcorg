@@ -31,7 +31,7 @@ const FastenerResults = () => {
         <h3 className="font-display text-sm font-semibold text-foreground mb-3">Velocity Pressure Derivation (ASD)</h3>
         <div className="font-mono text-xs text-muted-foreground space-y-1">
           <p>Kh = {outputs.Kh} (Exp {inputs.exposureCategory}, h = {inputs.h} ft)</p>
-          <p>qh_ASD = 0.00256 × {outputs.Kh} × {inputs.Kzt} × {inputs.Ke} × {inputs.V}² × 0.6</p>
+          <p>qh_ASD = 0.00256 × {outputs.Kh} × {inputs.Kzt} × {inputs.Kd} × {inputs.Ke} × {inputs.V}² × 0.6</p>
           <p className="text-foreground font-semibold">qh_ASD = {outputs.qh_ASD.toFixed(2)} psf</p>
         </div>
       </div>

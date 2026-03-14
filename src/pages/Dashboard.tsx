@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wind, ArrowLeft, FolderOpen, Calculator, Wrench, Plus, FileText, Clock } from 'lucide-react';
+import { Wind, ArrowLeft, FolderOpen, Calculator, Wrench, Plus, FileText, Clock, Link2 } from 'lucide-react';
 
 interface Project {
   id: string;

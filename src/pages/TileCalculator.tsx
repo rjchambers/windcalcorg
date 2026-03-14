@@ -49,6 +49,7 @@ const TileCalculator = () => {
             <Button variant="ghost" size="sm" onClick={() => navigate('/strap')} className="text-muted-foreground">
               <Link2 className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">Strap</span>
             </Button>
+            <TilePdfExportButton />
           </div>
         </div>
       </header>

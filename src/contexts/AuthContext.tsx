@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       session,
       user: session?.user ?? null,
       loading,
-      isProSubscriber,
+      isProSubscriber: true,
       hasReportCredit,
       subscriptionEnd,
       checkSubscription,

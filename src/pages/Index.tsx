@@ -39,7 +39,7 @@ const Navbar = ({ onCalc, onFastener }: { onCalc: () => void; onFastener: () => 
           <a href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a>
           <a href="#fastener" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FastenerCalc</a>
           <span className="text-sm text-muted-foreground cursor-not-allowed pointer-events-none opacity-50">Tile Calc (Coming Soon)</span>
-          <a href="#pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
+          <a href="#faq" className="text-sm text-primary font-medium">100% Free</a>
           <a href="#faq" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FAQ</a>
         </div>
         <div className="flex items-center gap-3">

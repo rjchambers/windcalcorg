@@ -17,7 +17,7 @@ const LandingPage = () => {
       <Features />
       <FastenerSection onStart={() => navigate('/fastener')} />
       <HowItWorks />
-      <PricingSection />
+      {/* Pricing removed — platform is free */}
       <FAQ />
       <Footer />
     </div>

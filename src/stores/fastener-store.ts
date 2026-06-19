@@ -31,6 +31,7 @@ interface FastenerStore {
   setTAS105Values: (values: number[]) => void;
   setTAS105Meta: (meta: Partial<TAS105Inputs>) => void;
   recalculate: () => void;
+  reset: () => void;
   loadCalculation: (id: string) => Promise<void>;
   saveCalculation: (userId: string, projectName: string, address: string) => Promise<string | null>;
 }
@@ -110,6 +111,17 @@ export const useFastenerStore = create<FastenerStore>()(
   recalculate: () => {
     set({ outputs: calculateFastener(get().inputs) });
   },
+  reset: () => {
+    set({
+      inputs: defaultInputs,
+      outputs: calculateFastener(defaultInputs),
+      tas105Inputs: { rawValues_lbf: [] },
+      tas105Outputs: null,
+      isDirty: false,
+      currentCalcId: null,
+      currentProjectId: null,
+    });
+  },
   loadCalculation: async (id: string) => {
     const { data, error } = await supabase
       .from('fastener_calculations')
@@ -130,7 +142,7 @@ export const useFastenerStore = create<FastenerStore>()(
     const { inputs, outputs, currentCalcId, currentProjectId } = get();
 
     if (currentCalcId && currentProjectId) {
-      await supabase.from('fastener_calculations').update({
+      const { error } = await supabase.from('fastener_calculations').update({
         inputs_json: inputs as any,
         results_json: outputs as any,
         name: projectName,
@@ -140,9 +152,11 @@ export const useFastenerStore = create<FastenerStore>()(
         construction_type: inputs.constructionType,
         qh_asd: outputs?.qh_ASD ?? null,
       }).eq('id', currentCalcId);
+      if (error) return null;
       if (address) {
         await supabase.from('projects').update({ address }).eq('id', currentProjectId);
       }
+      set({ isDirty: false });
       return currentCalcId;
     }
 
@@ -167,7 +181,7 @@ export const useFastenerStore = create<FastenerStore>()(
     }).select('id').single();
     if (calcErr || !calc) return null;
 
-    set({ currentCalcId: calc.id, currentProjectId: proj.id });
+    set({ currentCalcId: calc.id, currentProjectId: proj.id, isDirty: false });
     return calc.id;
   },
     }),

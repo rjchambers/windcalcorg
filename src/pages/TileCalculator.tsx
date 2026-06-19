@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Wind, ArrowLeft, Wrench, Link2, Home, LayoutDashboard, Save } from 'lucide-react';
+import { Wind, ArrowLeft, Wrench, Link2, Home, LayoutDashboard, Save, FilePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useTileStore } from '@/stores/tile-store';
@@ -58,6 +58,8 @@ const TileSavePopover = () => {
 const TileCalculator = () => {
   const navigate = useNavigate();
   const { outputs } = useTileStore();
+  const reset = useTileStore(s => s.reset);
+  const currentCalcId = useTileStore(s => s.currentCalcId);
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [mobileTab, setMobileTab] = useState('inputs');
@@ -94,6 +96,11 @@ const TileCalculator = () => {
             <Button variant="ghost" size="sm" onClick={() => navigate('/strap')} className="text-muted-foreground">
               <Link2 className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">Strap</span>
             </Button>
+            {currentCalcId && (
+              <Button variant="ghost" size="sm" onClick={() => { reset(); toast.success('Started a new calculation'); }} title="Start a new calculation">
+                <FilePlus className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">New</span>
+              </Button>
+            )}
             <TileSavePopover />
             <TilePdfExportButton />
           </div>

@@ -16,7 +16,7 @@ import FastenerCalcPdfReport from './FastenerCalcPdfReport';
 import SignAndSealModal from '@/components/pe/SignAndSealModal';
 
 const FastenerPdfExportButton = () => {
-  const { inputs, outputs, tas105Outputs } = useFastenerStore();
+  const { inputs, outputs, tas105Outputs, currentCalcId } = useFastenerStore();
   const { user, isProSubscriber, hasReportCredit, setHasReportCredit } = useAuth();
   const { profile } = useEngineerProfile();
   const { credentials } = usePECredentials();
@@ -148,7 +148,7 @@ const FastenerPdfExportButton = () => {
         </DialogContent>
       </Dialog>
 
-      <SignAndSealModal open={signModalOpen} onClose={() => setSignModalOpen(false)} calculationType="fastener_hvhz" projectName={projectName || 'Untitled Project'} projectAddress={jobAddress} generatePdf={generateUnsignedPdf} />
+      <SignAndSealModal open={signModalOpen} onClose={() => setSignModalOpen(false)} calculationType="fastener_hvhz" calculationId={currentCalcId ?? undefined} projectName={projectName || 'Untitled Project'} projectAddress={jobAddress} generatePdf={generateUnsignedPdf} />
     </>
   );
 };

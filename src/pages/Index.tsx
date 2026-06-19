@@ -38,7 +38,8 @@ const Navbar = ({ onCalc, onFastener }: { onCalc: () => void; onFastener: () => 
         <div className="hidden items-center gap-8 md:flex">
           <a href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a>
           <a href="#fastener" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FastenerCalc</a>
-          <span className="text-sm text-muted-foreground cursor-not-allowed pointer-events-none opacity-50">Tile Calc (Coming Soon)</span>
+          <button onClick={() => navigate('/tile')} className="text-sm text-muted-foreground transition-colors hover:text-foreground">Tile Calc</button>
+          <button onClick={() => navigate('/strap')} className="text-sm text-muted-foreground transition-colors hover:text-foreground">Strap Calc</button>
           <a href="#faq" className="text-sm text-primary font-medium">100% Free</a>
           <a href="#faq" className="text-sm text-muted-foreground transition-colors hover:text-foreground">FAQ</a>
         </div>
@@ -106,10 +107,10 @@ const Hero = ({ onStart, onFastener }: { onStart: () => void; onFastener: () => 
               </Button>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              No credit card required to calculate. Pay only when you need a permit-ready PDF.
+              100% free — no credit card, no per-report fees. Just calculate and export.
             </p>
             <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
-              <span>Free to calculate · $10 per clean PDF report</span>
+              <span>Free wind, fastener, tile &amp; strap calculations + permit-ready PDFs</span>
               <button onClick={() => navigate('/sample-reports')} className="text-primary hover:underline font-medium">
                 View Sample Reports →
               </button>
@@ -149,7 +150,9 @@ const features = [
   { icon: Shield, title: 'HVHZ Detection', description: 'HVHZ mode with Miami-Dade (175 mph) and Broward (170 mph) wind speed presets and mandatory Exposure C enforcement.' },
 ];
 
-const Features = () => (
+const Features = () => {
+  const navigate = useNavigate();
+  return (
   <section id="features" className="py-20">
     <div className="container mx-auto px-6">
       <div className="text-center">
@@ -165,17 +168,22 @@ const Features = () => (
           </div>
         ))}
       </div>
-      {/* Coming Soon Banner */}
-      <div className="mt-8 rounded-lg border border-warning/30 bg-warning/5 p-4 flex items-center gap-3">
-        <span className="text-warning text-lg">🏠</span>
-        <div>
-          <p className="text-sm font-semibold text-foreground">Tile Roof Calculator (RAS 127) — Coming soon</p>
+      {/* Tile Calculator — now live */}
+      <button
+        onClick={() => navigate('/tile')}
+        className="mt-8 w-full text-left rounded-lg border border-primary/30 bg-primary/5 p-4 flex items-center gap-3 transition-colors hover:border-primary/50 hover:bg-primary/10"
+      >
+        <span className="text-lg">🏠</span>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-foreground">Tile Roof Calculator (RAS 127) — now available</p>
           <p className="text-xs text-muted-foreground">Moment-based and uplift-based tile attachment for hip and gable roofs in HVHZ.</p>
         </div>
-      </div>
+        <ArrowRight className="h-4 w-4 text-primary shrink-0" />
+      </button>
     </div>
   </section>
-);
+  );
+};
 
 const FastenerSection = ({ onStart }: { onStart: () => void }) => {
   const navigate = useNavigate();

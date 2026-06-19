@@ -11,19 +11,20 @@ import WatermarkOverlay from './WatermarkOverlay';
 
 const FONT_MONO = 'Courier';
 
+// Monochrome palette — all values mapped to grayscale for a minimalist B&W report.
 const c = {
-  navy: '#0f172a',
-  slate: '#1e293b',
-  blue: '#2563eb',
+  navy: '#000000',
+  slate: '#000000',
+  blue: '#000000',
   white: '#ffffff',
-  gray: '#94a3b8',
-  grayDark: '#475569',
-  red: '#dc2626',
-  green: '#16a34a',
-  amber: '#d97706',
-  orange: '#ea580c',
-  border: '#cbd5e1',
-  bgLight: '#f1f5f9',
+  gray: '#666666',
+  grayDark: '#333333',
+  red: '#000000',
+  green: '#000000',
+  amber: '#000000',
+  orange: '#000000',
+  border: '#000000',
+  bgLight: '#f2f2f2',
 };
 
 const s = StyleSheet.create({

@@ -1,4 +1,4 @@
-import { Wind, Calculator, FileText, Shield, Zap, BarChart3, ArrowRight, Check, ChevronDown, Wrench, TestTube, User, LogOut, Crown, Link2, LayoutDashboard } from 'lucide-react';
+import { Wind, Calculator, FileText, Shield, Zap, ArrowRight, ChevronDown, Wrench, TestTube, User, LogOut, Link2, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -245,62 +245,6 @@ const HowItWorks = () => (
     </div>
   </section>
 );
-
-const tiers = [
-  { name: 'Calculate', price: 'Free', period: '', features: ['Unlimited wind uplift calcs', 'Unlimited fastener calcs', 'Interactive zone diagrams', 'Real-time results'], cta: 'Start Calculating', highlight: false, badge: null },
-  { name: 'Pay Per Report', price: '$10', period: '/report', features: ['Clean, unwatermarked PDF', 'Full derivation chain', 'Zone pressure tables', 'Signature & seal block', 'Permit-ready format'], cta: 'Buy Report — $10', highlight: false, badge: null },
-  { name: 'Pro', price: '$100', period: '/mo', features: ['Unlimited clean PDF exports', 'Wind, Fastener & Tile reports', 'No per-report fees', 'Priority support', 'Manage subscription anytime'], cta: 'Subscribe to Pro', highlight: true, badge: 'Best Value' },
-  { name: 'Firm', price: '$350', period: '/mo', features: ['Everything in Pro', '1 PE credential holder', 'Up to 5 drafter seats', 'PE review queue', 'Firm branding on all reports'], cta: 'Contact Us', highlight: false, badge: 'Teams' },
-];
-
-const PricingSection = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-
-  const handleProCheckout = async () => {
-    if (!user) { navigate('/login'); return; }
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data, error } = await supabase.functions.invoke('create-pro-checkout');
-      if (error) throw error;
-      if (data?.url) window.open(data.url, '_blank');
-    } catch (err) { console.error('Pro checkout failed:', err); }
-  };
-
-  return (
-    <section id="pricing" className="py-20">
-      <div className="container mx-auto px-6">
-        <h2 className="text-center font-display text-3xl font-bold text-foreground">Simple, Transparent Pricing</h2>
-        <p className="mt-3 text-center text-muted-foreground">Free to calculate. Pay only when you need a clean PDF.</p>
-        <div className="mx-auto mt-12 grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {tiers.map((t) => (
-            <div key={t.name} className={`relative rounded-lg border p-6 ${t.highlight ? 'border-primary bg-card shadow-glow' : 'border-border bg-card shadow-card'}`}>
-              {t.badge && <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">{t.badge}</div>}
-              <h3 className="font-display text-lg font-semibold text-foreground">{t.name}</h3>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="font-display text-3xl font-bold text-foreground">{t.price}</span>
-                <span className="text-sm text-muted-foreground">{t.period}</span>
-              </div>
-              <ul className="mt-6 space-y-3">
-                {t.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground"><Check className="h-4 w-4 text-primary" />{f}</li>
-                ))}
-              </ul>
-              <Button className="mt-6 w-full" variant={t.highlight ? 'default' : 'outline'} onClick={() => {
-                if (t.name === 'Pro') handleProCheckout();
-                else if (t.name === 'Pay Per Report') navigate('/sample-reports');
-                else navigate('/calculator');
-              }}>
-                {t.name === 'Pro' && <Crown className="mr-2 h-4 w-4" />}
-                {t.cta}
-              </Button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
 
 const faqs = [
   { q: 'Is this PE-stamped?', a: 'HVHZ Calc Pro provides calculations as a design aid. The Engineer of Record is responsible for reviewing and stamping all outputs.' },

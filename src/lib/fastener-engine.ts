@@ -312,6 +312,9 @@ export function solveRowsAndFS(
   Fy: number, P: number, NW_in: number, initialN: number
 ): { n: number; RS: number; FS: number; halfSheet: boolean } {
   const absP = Math.abs(P);
+  // Row spacing is sheet width / (rows - 1), so at least 2 rows are required to
+  // avoid an infinite spacing (division by zero).
+  initialN = Math.max(2, initialN);
   if (absP === 0) return { n: initialN, RS: NW_in / (initialN - 1), FS: 12, halfSheet: false };
 
   let n = initialN;
@@ -383,7 +386,7 @@ const T_TABLE: Record<number, number> = {
 
 function getTFactor(n: number): number {
   if (n <= 2) return 3.078;
-  if (n >= 30) return 1.645;
+  if (n > 30) return 1.645;
   // Direct lookup
   if (T_TABLE[n] !== undefined) return T_TABLE[n];
   // Interpolate between nearest table entries
@@ -400,8 +403,11 @@ function getTFactor(n: number): number {
 
 export function calculateTAS105(inputs: TAS105Inputs): TAS105Outputs {
   const n = inputs.rawValues_lbf.length;
-  if (n === 0) {
-    return { n: 0, mean_lbf: 0, stdDev_lbf: 0, tFactor: 0, MCRF_lbf: 0, pass: false };
+  // A sample standard deviation is undefined for n < 2 (division by n-1),
+  // so MCRF cannot be computed — treat as a non-passing/incomplete result.
+  if (n < 2) {
+    const mean = n === 1 ? inputs.rawValues_lbf[0] : 0;
+    return { n, mean_lbf: Math.round(mean * 10) / 10, stdDev_lbf: 0, tFactor: 0, MCRF_lbf: 0, pass: false };
   }
 
   const mean = inputs.rawValues_lbf.reduce((a, b) => a + b, 0) / n;

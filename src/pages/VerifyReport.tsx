@@ -61,9 +61,10 @@ const VerifyReport = () => {
   }
 
   const isValid = data && !data.revoked;
-  const calcTypeLabel = data?.calculation_type === 'wind' ? 'Wind Uplift Calculation'
-    : data?.calculation_type === 'fastener' ? 'FastenerCalc HVHZ'
+  const calcTypeLabel = data?.calculation_type === 'wind' || data?.calculation_type === 'wind_uplift' ? 'Wind Uplift Calculation'
+    : data?.calculation_type === 'fastener' || data?.calculation_type === 'fastener_hvhz' ? 'FastenerCalc HVHZ'
     : data?.calculation_type === 'tile' ? 'Tile Calc (RAS 127)'
+    : data?.calculation_type === 'strap' ? 'Roof-to-Wall Strap Calc'
     : data?.calculation_type ?? 'Engineering Calculation';
 
   return (

@@ -6,6 +6,7 @@ import { useStrapStore } from '@/stores/strap-store';
 import { useAuth } from '@/contexts/AuthContext';
 import StrapForm from '@/components/strap/StrapForm';
 import StrapResults from '@/components/strap/StrapResults';
+import StrapPdfExportButton from '@/components/pdf/StrapPdfExportButton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -96,6 +97,7 @@ const StrapCalculatorPage = () => {
               </Button>
             )}
             <StrapSavePopover />
+            <StrapPdfExportButton />
           </div>
         </div>
       </header>

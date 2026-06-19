@@ -18,7 +18,7 @@ type SigningStep = 'idle' | 'unlocking' | 'generating' | 'signing' | 'saving' | 
 interface SignAndSealModalProps {
   open: boolean;
   onClose: () => void;
-  calculationType: 'wind_uplift' | 'fastener_hvhz' | 'tile';
+  calculationType: 'wind_uplift' | 'fastener_hvhz' | 'tile' | 'strap';
   calculationId?: string;
   projectName: string;
   projectAddress?: string;
@@ -33,12 +33,14 @@ const TYPE_LABEL: Record<string, string> = {
   wind_uplift: 'Wind Uplift Analysis',
   fastener_hvhz: 'Fastener Calculation',
   tile: 'Tile Calculation (RAS 127)',
+  strap: 'Roof-to-Wall Strap Calculation',
 };
 
 const TYPE_FILE_PREFIX: Record<string, string> = {
   wind_uplift: 'WindUplift',
   fastener_hvhz: 'FastenerCalc',
   tile: 'TileCalc',
+  strap: 'StrapCalc',
 };
 
 const CERTIFICATIONS = [

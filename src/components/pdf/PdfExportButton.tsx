@@ -16,7 +16,7 @@ import WindCalcPdfReport from './WindCalcPdfReport';
 import SignAndSealModal from '@/components/pe/SignAndSealModal';
 
 const PdfExportButton = () => {
-  const { inputs, outputs } = useCalculationStore();
+  const { inputs, outputs, currentCalcId } = useCalculationStore();
   const { user, isProSubscriber, hasReportCredit, setHasReportCredit } = useAuth();
   const { profile } = useEngineerProfile();
   const { credentials } = usePECredentials();
@@ -148,7 +148,7 @@ const PdfExportButton = () => {
         </DialogContent>
       </Dialog>
 
-      <SignAndSealModal open={signModalOpen} onClose={() => setSignModalOpen(false)} calculationType="wind_uplift" projectName={projectName || 'Untitled Project'} projectAddress={jobAddress} generatePdf={generateUnsignedPdf} />
+      <SignAndSealModal open={signModalOpen} onClose={() => setSignModalOpen(false)} calculationType="wind_uplift" calculationId={currentCalcId ?? undefined} projectName={projectName || 'Untitled Project'} projectAddress={jobAddress} generatePdf={generateUnsignedPdf} />
     </>
   );
 };

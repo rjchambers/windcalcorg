@@ -11,6 +11,7 @@ interface TileStore {
   currentProjectId: string | null;
   setInput: <K extends keyof TileInputs>(key: K, value: TileInputs[K]) => void;
   recalculate: () => void;
+  reset: () => void;
   loadCalculation: (id: string) => Promise<void>;
   saveCalculation: (userId: string, projectName: string, address: string) => Promise<string | null>;
 }
@@ -50,6 +51,14 @@ export const useTileStore = create<TileStore>()(
       },
       recalculate: () => set({ outputs: calculateTile(get().inputs) }),
 
+      reset: () => set({
+        inputs: defaultInputs,
+        outputs: calculateTile(defaultInputs),
+        isDirty: false,
+        currentCalcId: null,
+        currentProjectId: null,
+      }),
+
       loadCalculation: async (id: string) => {
         const { data, error } = await supabase
           .from('tile_calculations')
@@ -71,14 +80,16 @@ export const useTileStore = create<TileStore>()(
         const { inputs, outputs, currentCalcId, currentProjectId } = get();
 
         if (currentCalcId && currentProjectId) {
-          await supabase.from('tile_calculations').update({
+          const { error } = await supabase.from('tile_calculations').update({
             inputs_json: inputs as any,
             results_json: outputs as any,
             name: projectName,
           }).eq('id', currentCalcId);
+          if (error) return null;
           if (address) {
             await supabase.from('projects').update({ address }).eq('id', currentProjectId);
           }
+          set({ isDirty: false });
           return currentCalcId;
         }
 

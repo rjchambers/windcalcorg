@@ -39,6 +39,24 @@ describe('calculateTAS105 — t-factor table (Issue 10)', () => {
     const result = calculateTAS105({ rawValues_lbf: values });
     expect(result.tFactor).toBeCloseTo(1.833, 2);
   });
+  it('uses the n=30 table value (1.697), not the asymptotic 1.645', () => {
+    const values = Array.from({ length: 30 }, (_, i) => 300 + i);
+    const result = calculateTAS105({ rawValues_lbf: values });
+    expect(result.tFactor).toBeCloseTo(1.697, 3);
+  });
+  it('does not produce NaN/pass for a single sample (n=1)', () => {
+    const result = calculateTAS105({ rawValues_lbf: [300] });
+    expect(result.pass).toBe(false);
+    expect(Number.isNaN(result.MCRF_lbf)).toBe(false);
+  });
+});
+
+describe('solveRowsAndFS — invalid row count', () => {
+  it('clamps initialN to >= 2 so row spacing is never infinite', () => {
+    const result = solveRowsAndFS(29.48, -45, 35.375, 1);
+    expect(Number.isFinite(result.RS)).toBe(true);
+    expect(result.n).toBeGreaterThanOrEqual(2);
+  });
 });
 
 const defaultInputs = {

@@ -11,6 +11,7 @@ interface CalculationStore {
   currentProjectId: string | null;
   setInput: <K extends keyof CalculationInputs>(key: K, value: CalculationInputs[K]) => void;
   recalculate: () => void;
+  reset: () => void;
   loadCalculation: (id: string) => Promise<void>;
   saveCalculation: (userId: string, projectName: string, address: string) => Promise<string | null>;
 }
@@ -51,6 +52,15 @@ export const useCalculationStore = create<CalculationStore>()(
   recalculate: () => {
     set({ outputs: calculate(get().inputs) });
   },
+  reset: () => {
+    set({
+      inputs: defaultInputs,
+      outputs: calculate(defaultInputs),
+      isDirty: false,
+      currentCalcId: null,
+      currentProjectId: null,
+    });
+  },
   loadCalculation: async (id: string) => {
     const { data, error } = await supabase
       .from('wind_calculations')
@@ -72,14 +82,16 @@ export const useCalculationStore = create<CalculationStore>()(
 
     if (currentCalcId && currentProjectId) {
       // Update existing
-      await supabase.from('wind_calculations').update({
+      const { error } = await supabase.from('wind_calculations').update({
         inputs_json: inputs as any,
         results_json: outputs as any,
         name: projectName,
       }).eq('id', currentCalcId);
+      if (error) return null;
       if (address) {
         await supabase.from('projects').update({ address }).eq('id', currentProjectId);
       }
+      set({ isDirty: false });
       return currentCalcId;
     }
 
@@ -100,7 +112,7 @@ export const useCalculationStore = create<CalculationStore>()(
     }).select('id').single();
     if (calcErr || !calc) return null;
 
-    set({ currentCalcId: calc.id, currentProjectId: proj.id });
+    set({ currentCalcId: calc.id, currentProjectId: proj.id, isDirty: false });
     return calc.id;
   },
     }),

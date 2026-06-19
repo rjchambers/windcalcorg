@@ -16,7 +16,7 @@ import TileCalcPdfReport from './TileCalcPdfReport';
 import SignAndSealModal from '@/components/pe/SignAndSealModal';
 
 const TilePdfExportButton = () => {
-  const { inputs, outputs } = useTileStore();
+  const { inputs, outputs, currentCalcId } = useTileStore();
   const { user, isProSubscriber, hasReportCredit, setHasReportCredit } = useAuth();
   const { profile } = useEngineerProfile();
   const { credentials } = usePECredentials();
@@ -146,7 +146,7 @@ const TilePdfExportButton = () => {
         </DialogContent>
       </Dialog>
 
-      <SignAndSealModal open={signModalOpen} onClose={() => setSignModalOpen(false)} calculationType="tile" projectName={projectName || 'Untitled Project'} projectAddress={jobAddress} generatePdf={generateUnsignedPdf} />
+      <SignAndSealModal open={signModalOpen} onClose={() => setSignModalOpen(false)} calculationType="tile" calculationId={currentCalcId ?? undefined} projectName={projectName || 'Untitled Project'} projectAddress={jobAddress} generatePdf={generateUnsignedPdf} />
     </>
   );
 };

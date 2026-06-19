@@ -161,11 +161,15 @@ const Settings = () => {
 
   const uploadSeal = async (file: File) => {
     if (!user) return;
-    if (!hasPERow) { await supabase.from('pe_credentials').insert({ user_id: user.id } as any); setHasPERow(true); }
     const path = `${user.id}/seal.png`;
-    const { error } = await supabase.storage.from('pe-seals').upload(path, file, { upsert: true });
-    if (error) throw error;
-    await supabase.from('pe_credentials').update({ seal_image_path: path, seal_uploaded_at: new Date().toISOString() } as any).eq('user_id', user.id);
+    const { error: uploadErr } = await supabase.storage.from('pe-seals').upload(path, file, { upsert: true });
+    if (uploadErr) throw uploadErr;
+    const { error: dbErr } = await supabase.from('pe_credentials').upsert(
+      { user_id: user.id, seal_image_path: path, seal_uploaded_at: new Date().toISOString() } as any,
+      { onConflict: 'user_id' }
+    );
+    if (dbErr) throw dbErr;
+    setHasPERow(true);
     const { data: urlData } = await supabase.storage.from('pe-seals').createSignedUrl(path, 3600);
     if (urlData?.signedUrl) setSealUrl(urlData.signedUrl);
     setPe(prev => ({ ...prev, seal_image_path: path }));
@@ -173,11 +177,15 @@ const Settings = () => {
 
   const uploadSignatureFile = async (file: File) => {
     if (!user) return;
-    if (!hasPERow) { await supabase.from('pe_credentials').insert({ user_id: user.id } as any); setHasPERow(true); }
     const path = `${user.id}/signature.png`;
-    const { error } = await supabase.storage.from('pe-signatures').upload(path, file, { upsert: true });
-    if (error) throw error;
-    await supabase.from('pe_credentials').update({ signature_image_path: path, signature_uploaded_at: new Date().toISOString() } as any).eq('user_id', user.id);
+    const { error: uploadErr } = await supabase.storage.from('pe-signatures').upload(path, file, { upsert: true });
+    if (uploadErr) throw uploadErr;
+    const { error: dbErr } = await supabase.from('pe_credentials').upsert(
+      { user_id: user.id, signature_image_path: path, signature_uploaded_at: new Date().toISOString() } as any,
+      { onConflict: 'user_id' }
+    );
+    if (dbErr) throw dbErr;
+    setHasPERow(true);
     const { data: urlData } = await supabase.storage.from('pe-signatures').createSignedUrl(path, 3600);
     if (urlData?.signedUrl) setSigUrl(urlData.signedUrl);
     setPe(prev => ({ ...prev, signature_image_path: path }));
@@ -201,12 +209,14 @@ const Settings = () => {
       const { publicKeyPem, privateKeyJwk, fingerprint } = await generateSigningKeypair();
       const { encryptedBlob, salt, iv } = await encryptPrivateKey(privateKeyJwk, certPassword);
       const expiresAt = new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000).toISOString();
-      if (!hasPERow) { await supabase.from('pe_credentials').insert({ user_id: user.id } as any); setHasPERow(true); }
-      await supabase.from('pe_credentials').update({
+      const { error: dbErr } = await supabase.from('pe_credentials').upsert({
+        user_id: user.id,
         certificate_public_key: publicKeyPem, certificate_fingerprint: fingerprint,
         certificate_generated_at: new Date().toISOString(), certificate_expires_at: expiresAt,
         encrypted_private_key_blob: encryptedBlob, encrypted_private_key_salt: salt, encrypted_private_key_iv: iv,
-      } as any).eq('user_id', user.id);
+      } as any, { onConflict: 'user_id' });
+      if (dbErr) throw dbErr;
+      setHasPERow(true);
       setPe(prev => ({ ...prev, certificate_fingerprint: fingerprint, certificate_generated_at: new Date().toISOString(), certificate_expires_at: expiresAt }));
       setCertPassword(''); setCertPasswordConfirm('');
       toast({ title: 'Certificate Generated', description: `Fingerprint: ${fingerprint.slice(0, 16)}…` });

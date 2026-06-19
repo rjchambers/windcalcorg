@@ -18,7 +18,7 @@ type SigningStep = 'idle' | 'unlocking' | 'generating' | 'signing' | 'saving' | 
 interface SignAndSealModalProps {
   open: boolean;
   onClose: () => void;
-  calculationType: 'wind_uplift' | 'fastener_hvhz' | 'tile';
+  calculationType: 'wind_uplift' | 'fastener_hvhz' | 'tile' | 'strap';
   calculationId?: string;
   projectName: string;
   projectAddress?: string;
@@ -28,6 +28,20 @@ interface SignAndSealModalProps {
   /** Called after successful signing with the signed blob for download */
   onSignedPdf?: (blob: Blob, filename: string) => void;
 }
+
+const TYPE_LABEL: Record<string, string> = {
+  wind_uplift: 'Wind Uplift Analysis',
+  fastener_hvhz: 'Fastener Calculation',
+  tile: 'Tile Calculation (RAS 127)',
+  strap: 'Roof-to-Wall Strap Calculation',
+};
+
+const TYPE_FILE_PREFIX: Record<string, string> = {
+  wind_uplift: 'WindUplift',
+  fastener_hvhz: 'FastenerCalc',
+  tile: 'TileCalc',
+  strap: 'StrapCalc',
+};
 
 const CERTIFICATIONS = [
   'I have reviewed and verified all calculations herein.',
@@ -112,7 +126,8 @@ const SignAndSealModal = ({
 
       // Step 4: Save signing event
       setStep('saving');
-      const filename = `${calculationType === 'wind_uplift' ? 'WindUplift' : 'FastenerCalc'}_${projectName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
+      const filePrefix = TYPE_FILE_PREFIX[calculationType] ?? 'Report';
+      const filename = `${filePrefix}_${projectName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
       setSignedFilename(filename);
 
       const { data: eventData, error: eventError } = await supabase
@@ -134,6 +149,24 @@ const SignAndSealModal = ({
 
       if (eventError) throw eventError;
       setSigningEventId(eventData?.id ?? null);
+
+      // Persist the signed document to private storage so it can be retrieved
+      // later (the verification record links to it). A storage failure here
+      // should not block the user from downloading their report.
+      if (eventData?.id) {
+        const storagePath = `${user.id}/${eventData.id}.pdf`;
+        const { error: storageErr } = await supabase.storage
+          .from('signed-reports')
+          .upload(storagePath, pdfBlob, { upsert: true, contentType: 'application/pdf' });
+        if (!storageErr) {
+          await supabase
+            .from('pe_signing_events')
+            .update({ signed_document_path: storagePath } as any)
+            .eq('id', eventData.id);
+        } else {
+          console.error('Failed to store signed report:', storageErr);
+        }
+      }
 
       // Mark first certification if not already done
       if (!credentials.credentials_certified_at) {
@@ -209,7 +242,7 @@ const SignAndSealModal = ({
             📄 Sign & Seal Report
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            {calculationType === 'wind_uplift' ? 'Wind Uplift Analysis' : 'Fastener Calculation'} — {projectName}
+            {TYPE_LABEL[calculationType] ?? 'Engineering Calculation'} — {projectName}
           </p>
         </DialogHeader>
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Wind, ArrowLeft, Wrench, Link2, Save, LayoutDashboard, Info } from 'lucide-react';
+import { Wind, ArrowLeft, Wrench, Link2, Save, LayoutDashboard, Info, FilePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCalculationStore } from '@/stores/calculation-store';
@@ -76,6 +76,8 @@ const SavePopover = () => {
 const CalculatorPage = () => {
   const navigate = useNavigate();
   const { outputs } = useCalculationStore();
+  const reset = useCalculationStore(s => s.reset);
+  const currentCalcId = useCalculationStore(s => s.currentCalcId);
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [mobileTab, setMobileTab] = useState('inputs');
@@ -112,6 +114,11 @@ const CalculatorPage = () => {
             <Button variant="ghost" size="sm" onClick={() => navigate('/strap')} className="text-muted-foreground">
               <Link2 className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">Strap</span>
             </Button>
+            {currentCalcId && (
+              <Button variant="ghost" size="sm" onClick={() => { reset(); toast.success('Started a new calculation'); }} title="Start a new calculation">
+                <FilePlus className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">New</span>
+              </Button>
+            )}
             <SavePopover />
             <PdfExportButton />
           </div>

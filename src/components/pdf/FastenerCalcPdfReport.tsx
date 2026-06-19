@@ -9,21 +9,22 @@ import type { FastenerInputs, FastenerOutputs, TAS105Outputs, NOAZoneResult } fr
 import type { EngineerProfile } from '@/lib/engineer-profile';
 import WatermarkOverlay from './WatermarkOverlay';
 
+// Monochrome palette — all values mapped to grayscale for a minimalist B&W report.
 const c = {
-  navy: '#0f172a',
-  slate: '#1e293b',
-  blue: '#2563eb',
-  blueLight: '#93c5fd',
+  navy: '#000000',
+  slate: '#000000',
+  blue: '#000000',
+  blueLight: '#cccccc',
   white: '#ffffff',
-  gray: '#94a3b8',
-  grayLight: '#cbd5e1',
-  grayDark: '#475569',
-  red: '#dc2626',
-  green: '#16a34a',
-  amber: '#d97706',
-  orange: '#ea580c',
-  border: '#cbd5e1',
-  bgLight: '#f1f5f9',
+  gray: '#666666',
+  grayLight: '#cccccc',
+  grayDark: '#333333',
+  red: '#000000',
+  green: '#000000',
+  amber: '#000000',
+  orange: '#000000',
+  border: '#000000',
+  bgLight: '#f2f2f2',
 };
 
 const s = StyleSheet.create({
@@ -200,7 +201,7 @@ const FastenerCalcPdfReport = ({
           <Text style={s.coverSub}>FBC 8th Edition (2023) · ASCE 7-22 · {rasRef} · TAS 105</Text>
           <View style={s.coverLine} />
           <View style={s.coverMeta}>
-            <Text style={{ fontSize: 14, color: c.white, fontFamily: 'Helvetica-Bold', marginBottom: 12 }}>{projectName}</Text>
+            <Text style={{ fontSize: 14, color: c.navy, fontFamily: 'Helvetica-Bold', marginBottom: 12 }}>{projectName}</Text>
             {jobAddress ? <Text style={s.coverMetaText}>Address: {jobAddress}</Text> : null}
             <Text style={s.coverMetaText}>County: {countyLabel}</Text>
             <Text style={s.coverMetaText}>Construction: {inputs.constructionType}</Text>
